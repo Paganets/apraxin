@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Супер-админка Карты Апрашки — управление проектом">
+    <meta name="theme-color" content="#000000">
+    <title>Супер-админка — Карта Апрашки</title>
+    
+    <!-- Supabase Configuration (передается через meta теги для безопасности) -->
+    <meta name="supabase-anon-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhZ3B1dWNkbmtyendzbW5ieW1rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MDMxMjYsImV4cCI6MjA4NjA3OTEyNn0.T3vFY9VfxIQ19AtWPkwk6xiqAZe6sEzG-Ke73olUPsY">
+    <meta name="supabase-url" content="https://qagpuucdnkrzwsmnbymk.supabase.co">
+    
+    <!-- Инициализация конфигурации Supabase из <meta> тегов -->
+    <script>
+      // Инициализация конфигурации Supabase из <meta> тегов
+      window.SupabaseConfig = {
+        url: document.querySelector('meta[name="supabase-url"]').content,
+        anonKey: document.querySelector('meta[name="supabase-anon-key"]').content
+      };
+    </script>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-mobile-web-app-status-bar-style" content="black">
+    
+    <!-- Стили -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/admin.css">
+    
+    <style>
+        /* ============================================================
+           СУПЕР-АДМИНКА - СПЕЦИФИЧНЫЕ СТИЛИ
+           ============================================================ */
+
+        .superadmin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-lg);
+        }
+
+        /* НАВИГАЦИЯ */
+        .superadmin-nav {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+            border-bottom: 2px solid var(--color-border);
+            overflow-x: auto;
+            padding-bottom: var(--spacing-md);
+        }
+
+        .nav-tab {
+            padding: var(--spacing-md) var(--spacing-lg);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: var(--font-size-base);
+            color: var(--color-text-light);
+            border-bottom: 3px solid transparent;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+        }
+
+        .nav-tab:hover {
+            color: var(--color-primary);
+        }
+
+        .nav-tab.active {
+            color: var(--color-accent);
+            border-bottom-color: var(--color-accent);
+        }
+
+        /* TAB CONTENT */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* СТАТИСТИКА */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .stat-card {
+            background: var(--color-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-fast);
+        }
+
+        .stat-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .stat-number {
+            font-size: var(--font-size-4xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-accent);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .stat-label {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ФИЛЬТРЫ И ПОИСК */
+        .filters-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            padding: var(--spacing-lg);
+            background: var(--color-bg-lighter);
+            border-radius: var(--radius-lg);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .filter-label {
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-text);
+        }
+
+        .filter-input,
+        .filter-select {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
+            background: var(--color-secondary);
+            color: var(--color-text);
+        }
+
+        .filter-input:focus,
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.1);
+        }
+
+        /* ТАБЛИЦЫ */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--color-secondary);
+        }
+
+        .data-table thead {
+            background: var(--color-primary);
+            color: var(--color-secondary);
+        }
+
+        .data-table th {
+            padding: var(--spacing-md) var(--spacing-lg);
+            text-align: left;
+            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-table td {
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-bottom: 1px solid var(--color-border);
+            font-size: var(--font-size-sm);
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--color-bg-light);
+        }
+
+        .table-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: var(--spacing-xs) var(--spacing-sm);
+            font-size: var(--font-size-xs);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--color-border);
+            background: var(--color-bg-light);
+            color: var(--color-primary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+        }
+
+        .btn-small:hover {
+            background: var(--color-accent);
+            color: var(--color-secondary);
+            border-color: var(--color-accent);
+        }
+
+        .btn-danger {
+            background: #ffcccc;
+            color: #c00;
+            border-color: #f44;
+        }
+
+        .btn-danger:hover {
+            background: #f44;
+            color: #fff;
+        }
+
+        .btn-success {
+            background: #ccffcc;
+            color: #040;
+            border-color: #4f4;
+        }
+
+        .btn-success:hover {
+            background: #4f4;
+            color: #fff;
+        }
+
+        /* БЕЙДЖИ */
+        .badge {
+            display: inline-block;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .badge-success {
+            background: #ccffcc;
+            color: #040;
+        }
+
+        .badge-danger {
+            background: #ffcccc;
+            color: #c00;
+        }
+
+        .badge-warning {
+            background: #ffffcc;
+            color: #660;
+        }
+
+        .badge-info {
+            background: #ccf;
+            color: #006;
+        }
+
+        .badge-gold {
+            background: #FFD700;
+            color: #000;
+        }
+
+        /* ФОРМА */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-label {
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--spacing-sm);
+            color: var(--color-text);
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            padding: var(--spacing-md);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-base);
+            background: var(--color-secondary);
+            color: var(--color-text);
+            font-family: inherit;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: var(--z-modal);
+            padding: var(--spacing-md);
+        }
+
+        .modal-content {
+            background: var(--color-secondary);
+            border-radius: var(--radius-lg);
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--color-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: var(--font-size-2xl);
+            cursor: pointer;
+            color: var(--color-text-light);
+            transition: all var(--transition-fast);
+        }
+
+        .modal-close:hover {
+            color: var(--color-primary);
+        }
+
+        .modal-body {
+            padding: var(--spacing-lg);
+        }
+
+        .modal-footer {
+            padding: var(--spacing-lg);
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: flex-end;
+        }
+
+        /* КНОПКИ */
+        .btn {
+            padding: var(--spacing-md) var(--spacing-lg);
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-semibold);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-primary {
+            background: var(--color-accent);
+            color: var(--color-secondary);
+        }
+
+        .btn-primary:hover {
+            background: #E5602E;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: var(--color-bg-light);
+            color: var(--color-primary);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-border);
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-3xl);
+            color: var(--color-text-light);
+        }
+
+        .empty-state-icon {
+            font-size: var(--font-size-5xl);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .superadmin-container {
+                padding: var(--spacing-md);
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--spacing-md);
+            }
+
+            .filters-panel {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                min-width: 100%;
+            }
+
+            .table-actions {
+                display: flex;
+                flex-direction: column;
+                gap: var(--spacing-xs);
+            }
+
+            .btn-small {
+                width: 100%;
+                text-align: center;
+            }
+
+            .superadmin-nav {
+                gap: var(--spacing-sm);
+            }
+
+            .nav-tab {
+                padding: var(--spacing-sm) var(--spacing-md);
+                font-size: var(--font-size-sm);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .superadmin-container {
+                padding: var(--spacing-sm);
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .data-table {
+                font-size: var(--font-size-xs);
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: var(--spacing-sm);
+            }
+
+            .modal-content {
+                max-width: 100%;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0 !important;
+                transition-duration: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="superadmin-root">
+        <!-- ШАПКА -->
+        <header class="admin-header">
+            <div class="admin-header-title">
+                <h1>👑 Супер-админка Апрашки</h1>
+                <p style="margin: 0; font-size: var(--font-size-sm); color: var(--color-text-light);">
+                    Управление проектом
+                </p>
+            </div>
+            <div class="admin-header-user" id="owner-info">
+                <span id="owner-name">👤 Загрузка...</span>
+                <button class="btn btn-primary" onclick="handleLogout()">🚪 Выход</button>
+            </div>
+        </header>
+
+        <div class="superadmin-container">
+            <!-- ЗАЩИТА: ТОЛЬКО ДЛЯ ВЛАДЕЛЬЦА -->
+            <div id="access-denied" style="display: none;">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🔒</div>
+                    <h2>Доступ запрещён</h2>
+                    <p>Эта страница доступна только для владельца проекта.</p>
+                    <a href="/" class="btn btn-primary" style="display: inline-block;">← На главную</a>
+                </div>
+            </div>
+
+            <div id="admin-content" style="display: none;">
+                <!-- НАВИГАЦИЯ -->
+                <div class="superadmin-nav">
+                    <button class="nav-tab active" onclick="switchTab('stats')">📊 Статистика</button>
+                    <button class="nav-tab" onclick="switchTab('pavilions')">🏪 Павильоны</button>
+                    <button class="nav-tab" onclick="switchTab('tenants')">👥 Арендаторы</button>
+                    <button class="nav-tab" onclick="switchTab('ads')">📢 Реклама</button>
+                    <button class="nav-tab" onclick="switchTab('settings')">⚙️ Настройки</button>
+                </div>
+
+                <!-- TAB: СТАТИСТИКА -->
+                <div class="tab-content active" id="stats-tab">
+                    <h2 style="color: var(--color-primary); margin-bottom: var(--spacing-lg);">📊 Общая статистика проекта</h2>
+                    
+                    <div class="stats-grid" id="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-pavilions">0</div>
+                            <div class="stat-label">Всего павильонов</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-premium">0</div>
+                            <div class="stat-label">Премиум павильонов</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-tenants">0</div>
+                            <div class="stat-label">Арендаторов</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-approved">0</div>
+                            <div class="stat-label">Одобрено арендаторов</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-views">0</div>
+                            <div class="stat-label">Просмотров страниц</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-revenue">0 ₽</div>
+                            <div class="stat-label">Доход от премиум</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: ПАВИЛЬОНЫ -->
+                <div class="tab-content" id="pavilions-tab">
+                    <h2 style="color: var(--color-primary); margin-bottom: var(--spacing-lg);">🏪 Управление павильонами</h2>
+                    
+                    <!-- Фильтры -->
+                    <div class="filters-panel">
+                        <div class="filter-group">
+                            <label class="filter-label">Поиск по названию</label>
+                            <input type="text" class="filter-input" id="pavilion-search" placeholder="Название магазина...">
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Этаж</label>
+                            <select class="filter-select" id="pavilion-floor-filter">
+                                <option value="">Все этажи</option>
+                                <option value="1">1 этаж</option>
+                                <option value="2">2 этаж</option>
+                                <option value="3">3 этаж</option>
+                                <option value="4">4 этаж</option>
+                                <option value="5">5 этаж</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Категория</label>
+                            <select class="filter-select" id="pavilion-category-filter">
+                                <option value="">Все категории</option>
+                                <option value="clothing">👕 Одежда</option>
+                                <option value="shoes">👞 Обувь</option>
+                                <option value="accessories">✨ Аксессуары</option>
+                                <option value="electronics">📱 Электроника</option>
+                                <option value="cosmetics">💄 Косметика</option>
+                                <option value="sports">⚽ Спорт</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Статус</label>
+                            <select class="filter-select" id="pavilion-status-filter">
+                                <option value="">Все статусы</option>
+                                <option value="premium">⭐ Премиум</option>
+                                <option value="free">Бесплатно</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Таблица павильонов -->
+                    <div class="table-wrapper">
+                        <table class="data-table" id="pavilions-table">
+                            <thead>
+                                <tr>
+                                    <th>Этаж</th>
+                                    <th>Номер</th>
+                                    <th>Название</th>
+                                    <th>Категория</th>
+                                    <th>Владелец</th>
+                                    <th>Статус</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pavilions-table-body">
+                                <tr>
+                                    <td colspan="7" style="text-align: center; padding: var(--spacing-lg); color: var(--color-text-light);">
+                                        Загрузка павильонов...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB: АРЕНДАТОРЫ -->
+                <div class="tab-content" id="tenants-tab">
+                    <h2 style="color: var(--color-primary); margin-bottom: var(--spacing-lg);">👥 Управление арендаторами</h2>
+                    
+                    <button id="btn-add-tenant" class="btn btn-primary" onclick="window.SuperAdmin.showAddTenantModal()" style="margin-bottom: var(--spacing-lg);">
+                        ➕ Добавить арендатора
+                    </button>
+
+                    <!-- Фильтры -->
+                    <div class="filters-panel">
+                        <div class="filter-group">
+                            <label class="filter-label">Поиск по имени/телефону</label>
+                            <input type="text" class="filter-input" id="tenant-search" placeholder="Имя или номер...">
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Статус</label>
+                            <select class="filter-select" id="tenant-status-filter">
+                                <option value="">Все</option>
+                                <option value="approved">✅ Одобрены</option>
+                                <option value="pending">⏳ На проверке</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Таблица арендаторов -->
+                    <div class="table-wrapper">
+                        <table class="data-table" id="tenants-table">
+                            <thead>
+                                <tr>
+                                    <th>Имя</th>
+                                    <th>Телефон</th>
+                                    <th>Статус</th>
+                                    <th>Премиум</th>
+                                    <th>Павильонов</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tenants-table-body">
+                                <tr>
+                                    <td colspan="6" style="text-align: center; padding: var(--spacing-lg); color: var(--color-text-light);">
+                                        Загрузка арендаторов...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB: РЕКЛАМА -->
+                <div class="tab-content" id="ads-tab">
+                    <h2 style="color: var(--color-primary); margin-bottom: var(--spacing-lg);">📢 Управление рекламой</h2>
+                    
+                    <div style="max-width: 600px;">
+                        <!-- Статус баннера -->
+                        <div class="form-group">
+                            <label class="form-label">Статус рекламного баннера</label>
+                            <div style="display: flex; gap: var(--spacing-md); align-items: center;">
+                                <span id="banner-status" class="badge badge-danger">Неактивен</span>
+                                <button id="btn-activate-banner" class="btn btn-primary" onclick="window.SuperAdmin.activateBanner()">🚀 Активировать</button>
+                                <button id="btn-deactivate-banner" class="btn btn-secondary" onclick="window.SuperAdmin.deactivateBanner()" style="display: none;">⛔ Деактивировать</button>
+                            </div>
+                        </div>
+
+                        <!-- Загрузка баннера -->
+                        <div class="form-group">
+                            <label class="form-label">Загрузить изображение баннера (макс 500 КБ)</label>
+                            <div class="image-upload-area" onclick="document.getElementById('ad-image-input').click()" style="padding: var(--spacing-lg); border: 2px dashed var(--color-border); border-radius: var(--radius-md); text-align: center; cursor: pointer; transition: all var(--transition-fast);">
+                                <p>📸 Кликните или перетащите изображение</p>
+                            </div>
+                            <input type="file" id="ad-image-input" accept="image/*" style="display: none;">
+                        </div>
+
+                        <!-- Предпросмотр -->
+                        <div class="form-group">
+                            <label class="form-label">Предпросмотр</label>
+                            <div id="banner-preview" style="max-width: 100%; border-radius: var(--radius-md); border: 1px solid var(--color-border); padding: var(--spacing-md); background: var(--color-secondary);">
+                                <p>Нет изображения</p>
+                            </div>
+                        </div>
+
+                        <!-- HTML код баннера -->
+                        <div class="form-group">
+                            <label class="form-label">HTML код баннера</label>
+                            <textarea class="form-textarea" id="banner-html-code" placeholder="Вставьте HTML код рекламного баннера"></textarea>
+                        </div>
+
+                        <!-- Статистика -->
+                        <div class="form-group">
+                            <label class="form-label">Статистика баннера</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md);">
+                                <div>
+                                    <div style="font-size: var(--font-size-sm); color: var(--color-text-light);">Показов</div>
+                                    <div style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--color-accent);" id="ad-impressions">0</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: var(--font-size-sm); color: var(--color-text-light);">Кликов</div>
+                                    <div style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--color-accent);" id="ad-clicks">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" onclick="window.SuperAdmin.saveBannerSettings()">💾 Сохранить</button>
+                    </div>
+                </div>
+
+                <!-- TAB: НАСТРОЙКИ -->
+                <div class="tab-content" id="settings-tab">
+                    <h2 style="color: var(--color-primary); margin-bottom: var(--spacing-lg);">⚙️ Настройки проекта</h2>
+                    
+                    <div style="max-width: 600px;">
+                        <!-- Название проекта -->
+                        <div class="form-group">
+                            <label class="form-label">Название проекта</label>
+                            <input type="text" class="form-input" id="project-name" placeholder="Карта Апрашки">
+                        </div>
+
+                        <!-- Цветовая схема -->
+                        <div class="form-group">
+                            <label class="form-label">Основной цвет</label>
+                            <div style="display: flex; gap: var(--spacing-md); align-items: center;">
+                                <input type="color" id="project-color" value="#FF6B35" style="width: 50px; height: 50px; border: none; border-radius: var(--radius-md); cursor: pointer;">
+                                <input type="text" class="form-input" id="project-color-hex" value="#FF6B35" style="flex: 1;">
+                            </div>
+                        </div>
+
+                        <!-- Управление категориями -->
+                        <div class="form-group">
+                            <label class="form-label">Категории товаров</label>
+                            <div id="categories-list" style="margin-bottom: var(--spacing-md);">
+                                <!-- Загрузится динамически -->
+                            </div>
+                            <button id="btn-add-category" class="btn btn-secondary" onclick="window.SuperAdmin.showAddCategoryModal()">➕ Добавить категорию</button>
+                        </div>
+
+                        <button class="btn btn-primary" id="settings-save-btn" onclick="window.SuperAdmin.saveProjectSettings()">💾 Сохранить настройки</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Добавить арендатора -->
+    <div class="modal-overlay" id="add-tenant-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>➕ Добавить нового арендатора</h3>
+                <button class="modal-close" onclick="hideAddTenantModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-tenant-form">
+                    <div class="form-group">
+                        <label class="form-label">Имя *</label>
+                        <input type="text" class="form-input" id="new-tenant-name" placeholder="Иван Иванов" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Телефон *</label>
+                        <input type="tel" class="form-input" id="new-tenant-phone" placeholder="+7 (999) 999-99-99" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Премиум статус</label>
+                        <input type="checkbox" id="new-tenant-premium">
+                        <label for="new-tenant-premium" style="margin-top: var(--spacing-sm); display: inline;">Является премиум</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideAddTenantModal()">Отмена</button>
+                <button class="btn btn-primary" onclick="saveNewTenant()">Добавить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Добавить категорию -->
+    <div class="modal-overlay" id="add-category-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>➕ Добавить категорию</h3>
+                <button class="modal-close" onclick="hideAddCategoryModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Название категории *</label>
+                    <input type="text" class="form-input" id="new-category-name" placeholder="Например: Электроника" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Эмодзи (опционально)</label>
+                    <input type="text" class="form-input" id="new-category-emoji" placeholder="📱" maxlength="2">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideAddCategoryModal()">Отмена</button>
+                <button class="btn btn-primary" onclick="saveNewCategory()">Добавить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- СКРИПТЫ -->
+    <script src="js/pwa.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/superadmin.js"></script>
+
+    <script>
+        // Обработчик выхода
+        function handleLogout() {
+            if (confirm('Вы уверены, что хотите выйти?')) {
+                window.Auth?.logout?.();
+            }
+        }
+
+        // Сохранение нового арендатора (вспомогательная функция)
+        async function saveNewTenant() {
+            const name = document.getElementById('new-tenant-name').value;
+            const phone = document.getElementById('new-tenant-phone').value;
+            const isPremium = document.getElementById('new-tenant-premium').checked;
+            
+            if (!name || !phone) { 
+                alert('Заполните все поля'); 
+                return; 
+            }
+            
+            await window.SuperAdmin.addTenantManually?.({
+                name,
+                phone,
+                is_premium: isPremium
+            });
+        }
+
+        // Добавить категорию (вспомогательная функция)
+        async function saveNewCategory() {
+            const name = document.getElementById('new-category-name').value;
+            const emoji = document.getElementById('new-category-emoji').value || '📦';
+            
+            if (!name) { 
+                alert('Укажите название категории'); 
+                return; 
+            }
+            
+            await window.SuperAdmin.addGlobalCategory?.({
+                name,
+                emoji
+            });
+        }
+
+        // Вспомогательные функции для действий (используют window.SuperAdmin)
+        function editPavilion(id) { 
+            window.SuperAdmin?.editPavilion?.(id); 
+        }
+        
+        function deletePavilion(id) { 
+            window.SuperAdmin?.deletePavilion?.(id); 
+        }
+        
+        function togglePremium(id, isPremium) { 
+            window.SuperAdmin?.togglePavPremium?.(id); 
+        }
+        
+        function approveTenant(id) { 
+            window.SuperAdmin?.approveTenant?.(id); 
+        }
+        
+        function toggleTenantPremium(id, isPremium) { 
+            window.SuperAdmin?.toggleTenantPremium?.(id); 
+        }
+        
+        function deleteTenant(id) { 
+            window.SuperAdmin?.deleteTenant?.(id); 
+        }
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.SuperAdmin && window.SuperAdmin.init) {
+                window.SuperAdmin.init();
+            }
+        });
+    </script>
+</body>
+</html>

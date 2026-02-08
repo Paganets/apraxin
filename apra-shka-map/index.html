@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="Интерактивная карта Апраксина двора в Санкт-Петербурге. Найдите все павильоны, скидки и предложения.">
+    <meta name="keywords" content="Апрашка, Апраксин двор, карта, павильоны, магазины, Санкт-Петербург">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Апрашка">
+    
+    <title>Карта Апрашки — Интерактивная карта Апраксина двора</title>
+    
+    <!-- Supabase Configuration (передается через meta теги для безопасности) -->
+    <meta name="supabase-anon-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhZ3B1dWNkbmtyendzbW5ieW1rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MDMxMjYsImV4cCI6MjA4NjA3OTEyNn0.T3vEY9VfxIQ19AtWPkwk6xiqAZe6sEzG-Ke73olUPsY">
+    <meta name="supabase-url" content="https://qagpuucdnkrzwsmnbymk.supabase.co">
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23000000' width='192' height='192'/><text x='50%' y='50%' font-size='112' fill='white' text-anchor='middle' dominant-baseline='central' font-weight='bold'>А</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23000000' width='180' height='180'/><text x='50%' y='50%' font-size='100' fill='white' text-anchor='middle' dominant-baseline='central' font-weight='bold'>А</text></svg>">
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- ============================================================
+         HEADER - Шапка приложения
+         ============================================================ -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1 class="app-title">Карта Апрашки</h1>
+                <p class="app-subtitle">Апраксин двор, Санкт-Петербург</p>
+            </div>
+            <nav class="header-nav">
+                <a href="index.html" class="nav-link active" title="Интерактивная карта">
+                    <span class="icon">🗺️</span>
+                    <span>Карта</span>
+                </a>
+                <a href="admin.html" class="nav-link" title="Управление павильонами">
+                    <span class="icon">⚙️</span>
+                    <span>Админка</span>
+                </a>
+                <button id="auth-btn" class="auth-btn" title="Войти в аккаунт">
+                    <span class="icon">👤</span>
+                    <span>Вход</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ============================================================
+         MAIN - Основная часть приложения
+         ============================================================ -->
+    <main class="app-main">
+        <!-- КОНТРОЛЬНАЯ ПАНЕЛЬ (фильтры и поиск) -->
+        <section class="controls-panel">
+            <div class="controls-wrapper">
+                <!-- Поиск по названию магазина -->
+                <div class="search-group">
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        class="search-input" 
+                        placeholder="🔍 Поиск по названию магазина..."
+                        aria-label="Поиск павильонов">
+                    <button class="search-clear" id="search-clear" aria-label="Очистить поиск" style="display: none;">✕</button>
+                </div>
+
+                <!-- Фильтр по категориям -->
+                <div class="filter-group">
+                    <select id="category-filter" class="category-filter" aria-label="Фильтр по категориям">
+                        <option value="">Все категории</option>
+                        <option value="одежда">👕 Одежда</option>
+                        <option value="обувь">👞 Обувь</option>
+                        <option value="аксессуары">💍 Аксессуары</option>
+                        <option value="электроника">📱 Электроника</option>
+                        <option value="косметика">💄 Косметика</option>
+                        <option value="спорт">⚽ Спорт</option>
+                        <option value="буквы">📚 Буквы и наклейки</option>
+                        <option value="другое">🛍️ Другое</option>
+                    </select>
+                </div>
+
+                <!-- Кнопка для владельцев павильонов -->
+                <a href="admin.html" class="btn-add-pavilion" title="Добавить свой павильон">
+                    ➕ Добавить павильон
+                </a>
+            </div>
+        </section>
+
+        <!-- КОНТЕЙНЕР КАРТЫ -->
+        <div class="map-wrapper">
+            <div id="map-container" class="map-container">
+                <!-- SVG карта Апраксина двора -->
+                <svg 
+                    id="market-map" 
+                    class="market-map" 
+                    viewBox="0 0 1000 600" 
+                    xmlns="http://www.w3.org/2000/svg"
+                    role="img"
+                    aria-label="Интерактивная карта Апраксина двора">
+                    
+                    <!-- Подложка (фон здания) -->
+                    <defs>
+                        <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#e0e0e0" stroke-width="0.5"/>
+                        </pattern>
+                        <linearGradient id="buildingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#f5f5f5;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#e8e8e8;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Основной фон здания -->
+                    <rect width="1000" height="600" fill="url(#buildingGradient)" stroke="#999" stroke-width="2"/>
+                    <rect width="1000" height="600" fill="url(#grid)" opacity="0.3"/>
+
+                    <!-- Название здания -->
+                    <text x="500" y="30" font-size="24" font-weight="bold" text-anchor="middle" fill="#333">
+                        АПРАКСИН ДВОР
+                    </text>
+
+                    <!-- Отделение ВХОД -->
+                    <rect x="10" y="50" width="100" height="80" fill="#90EE90" stroke="#333" stroke-width="2" rx="5"/>
+                    <text x="60" y="100" font-size="14" font-weight="bold" text-anchor="middle" fill="#333">ВХОД</text>
+
+                    <!-- Пресс-центр область -->
+                    <rect x="150" y="50" width="120" height="80" fill="#FFE4B5" stroke="#333" stroke-width="2" rx="5"/>
+                    <text x="210" y="100" font-size="12" font-weight="bold" text-anchor="middle" fill="#333">Информация</text>
+
+                    <!-- Туалеты -->
+                    <circle cx="900" cy="100" r="40" fill="#87CEEB" stroke="#333" stroke-width="2"/>
+                    <text x="900" y="105" font-size="12" font-weight="bold" text-anchor="middle" fill="#333">🚻 WC</text>
+
+                    <!-- Плейсхолдеры для павильонов (сетка) -->
+                    <!-- Левая часть -->
+                    <g id="pavilions-left">
+                        <rect x="20" y="160" width="80" height="60" fill="#fff" stroke="#999" stroke-width="1" class="pavilion-slot" data-slot="a1" rx="3"/>
+                        <text x="60" y="195" font-size="10" text-anchor="middle" fill="#999">A-1</text>
+
+                        <rect x="110" y="160" width="80" height="60" fill="#fff" stroke="#999" stroke-width="1" class="pavilion-slot" data-slot="a2" rx="3"/>
+                        <text x="150" y="195" font-size="10" text-anchor="middle" fill="#999">A-2</text>
+
+                        <rect x="200" y="160" width="80" height="60" fill="#fff" stroke="#999" stroke-width="1" class="pavilion-slot" data-slot="a3" rx="3"/>
+                        <text x="240" y="195" font-size="10" text-anchor="middle" fill="#999">A-3</text>
+
+                        <rect x="20" y="240" width="80" height="60" fill="#fff" stroke="#999" stroke-width="1" class="pavilion-slot" data-slot="b1" rx="3"/>
+                        <text x="60" y="275" font-size="10" text-anchor="middle" fill="#999">B-1</text>
+
+                        <rect x="110" y="240" width="80" height="60" fill="#fff" stroke="#999" stroke-width="1" class="pavilion-slot" data-slot="b2" rx="3"/>
+                        <text x="150" y="275" font-size="10" text-anchor="middle" fill="#999">B-2</text>
+
+                        <rect x="200" y="240" width="80" height="60" fill="#fff" stroke="#999" stroke-width="1" class="pavilion-slot" data-slot="b3" rx="3"/>
+                        <text x="240" y="275" font-size="10" text-anchor="middle" fill="#999">B-3</text>
+                    </g>
+
+                    <!-- Центральная часть -->
+                    <g id="pavilions-center">
+                        <rect x="350" y="160" width="80" height="60" fill="#fff" stroke="#999" stroke-width="1" class="pavilion-slot" data-slot="c1" rx="3"/>
+                        <text x="390" y="195" font-size="10" text-anchor="middle" fill="#999">C-1</text>
+
+                        <rect x="440" y="160" width="80" height="60" fill="#fff" stroke="#999" stroke-width="1" class="pavilion-slot" data-slot="c2" rx="3"/>
+                        <text x="480" y="195" font-size="10" text-anchor="middle" fill="#999">C-2</text>
+
+                        <rect x="530" y="160" width="80" height="60" fill="#fff" stroke="#999" stroke-width="1" class="pavilion-slot" data-slot="c3" rx="3"/>
+                        <text x="570" y="195" font-size="10" text-anchor="middle" fill="#999">C-3</text>
+
+                        <rect x="350" y="240" width="80" height="60" fill="#fff" stroke="#999" stroke-width="1" class="pavilion-slot" data-slot="d1" rx="3"/>
+                        <text x="390" y="275" font-size="10" text-anchor="middle" fill="#999">D-1</text>
+
+                        <rect x="440" y="240" width="80" height="60" fill="#fff" stroke="#999" stroke-width="1" class="pavilion-slot" data-slot="d2" rx="3"/>
+                        <text x="480" y="275" font-size="10" text-anchor="middle" fill="#999">D-2</text>
+                    </g>
+
+                    <!-- Правая часть -->
+                    <g id="pavilions-right">
+                        <rect x="700" y="160" width="80" height="60" fill="#fff" stroke="#999" stroke-width="1" class="pavilion-slot" data-slot="e1" rx="3"/>
+                        <text x="740" y="195" font-size="10" text-anchor="middle" fill="#999">E-1</text>
+
+                        <rect x="790" y="160" width="80" height="60" fill="#fff" stroke="#999" stroke-width="1" class="pavilion-slot" data-slot="e2" rx="3"/>
+                        <text x="830" y="195" font-size="10" text-anchor="middle" fill="#999">E-2</text>
+
+                        <rect x="700" y="240" width="80" height="60" fill="#fff" stroke="#999" stroke-width="1" class="pavilion-slot" data-slot="f1" rx="3"/>
+                        <text x="740" y="275" font-size="10" text-anchor="middle" fill="#999">F-1</text>
+
+                        <rect x="790" y="240" width="80" height="60" fill="#fff" stroke="#999" stroke-width="1" class="pavilion-slot" data-slot="f2" rx="3"/>
+                        <text x="830" y="275" font-size="10" text-anchor="middle" fill="#999">F-2</text>
+                    </g>
+
+                    <!-- Легенда (масштаб) -->
+                    <g class="legend">
+                        <rect x="20" y="520" width="200" height="70" fill="white" stroke="#999" stroke-width="1" rx="3" opacity="0.9"/>
+                        <text x="30" y="540" font-size="12" font-weight="bold" fill="#333">ЛЕГЕНДА</text>
+                        <rect x="30" y="548" width="15" height="15" fill="#fff" stroke="#999" stroke-width="1"/>
+                        <text x="50" y="560" font-size="11" fill="#333">Свободно</text>
+                        <rect x="130" y="548" width="15" height="15" fill="#90EE90" stroke="#333" stroke-width="1"/>
+                        <text x="150" y="560" font-size="11" fill="#333">Занято</text>
+                        <rect x="30" y="573" width="15" height="15" fill="#FFB6C1" stroke="#333" stroke-width="1"/>
+                        <text x="50" y="585" font-size="11" fill="#333">Избранное</text>
+                    </g>
+                </svg>
+
+                <!-- Сообщение о загрузке -->
+                <div id="loading-message" class="loading-message" style="display: none;">
+                    ⏳ Загрузка павильонов...
+                </div>
+
+                <!-- Сообщение об ошибке -->
+                <div id="error-message" class="error-message" style="display: none;">
+                    ⚠️ Не удалось загрузить карту. Проверьте соединение.
+                </div>
+            </div>
+
+            <!-- БОКОВАЯ ПАНЕЛЬ - Информация о выбранном павильоне -->
+            <aside id="pavilion-info" class="pavilion-info hidden" role="complementary">
+                <button class="close-btn" id="close-pavilion" aria-label="Закрыть информацию">&times;</button>
+                
+                <div class="pavilion-content">
+                    <header class="pavilion-header">
+                        <h2 id="pavilion-name">Выберите павильон</h2>
+                        <p id="pavilion-number" class="pavilion-number">—</p>
+                    </header>
+
+                    <section id="pavilion-details" class="pavilion-details">
+                        <div class="detail-block">
+                            <h3>Категория</h3>
+                            <p id="pavilion-category">—</p>
+                        </div>
+
+                        <div class="detail-block">
+                            <h3>Скидки</h3>
+                            <ul id="pavilion-discounts">
+                                <li class="no-discounts">Нет активных скидок</li>
+                            </ul>
+                        </div>
+
+                        <div class="detail-block">
+                            <h3>О проекте</h3>
+                            <p class="help-text">
+                                Выбирайте павильоны на карте слева, чтобы узнать больше информации и скидки.
+                            </p>
+                        </div>
+                    </section>
+
+                    <footer class="pavilion-footer">
+                        <button class="btn btn-share" id="share-btn" style="display: none;">
+                            📤 Поделиться
+                        </button>
+                    </footer>
+                </div>
+            </aside>
+        </div>
+
+        <!-- СТАТИСТИКА -->
+        <section class="stats-section" aria-label="Статистика">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-pavilions">0</div>
+                    <div class="stat-label">Павильонов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="categories-count">0</div>
+                    <div class="stat-label">Категорий</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="discounts-count">0</div>
+                    <div class="stat-label">Скидок</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ============================================================
+         FOOTER - Подвал приложения
+         ============================================================ -->
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>О проекте</h3>
+                <p>
+                    Интерактивная карта Апраксина двора в Санкт-Петербурге. 
+                    Находите павильоны, смотрите скидки и предложения.
+                </p>
+            </div>
+            <div class="footer-section">
+                <h3>Контакты</h3>
+                <p>
+                    Апраксин двор<br>
+                    г. Санкт-Петербург<br>
+                    <a href="tel:+79001234567">+7 (900) 123-45-67</a>
+                </p>
+            </div>
+            <div class="footer-section">
+                <h3>Для владельцев</h3>
+                <p>
+                    <a href="admin.html">Управление павильоном</a><br>
+                    <a href="#privacy">Политика конфиденциальности</a>
+                </p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Карта Апрашки. Все права защищены.</p>
+            <p class="version">v1.0.0</p>
+        </div>
+    </footer>
+
+    <!-- ============================================================
+         СКРИПТЫ
+         ============================================================ -->
+    <!-- Инициализация Supabase конфигурации (из meta тегов) -->
+    <script>
+        // Получаем ключ из <meta> тега для безопасности
+        // Ключи передаются через HTML, а не хранятся в JS файлах
+        const supabaseAnonKey = document.querySelector('meta[name="supabase-anon-key"]').content;
+        const supabaseUrl = document.querySelector('meta[name="supabase-url"]').content;
+
+        // Создаём глобальный объект конфигурации
+        window.SupabaseConfig = {
+            url: supabaseUrl,
+            anonKey: supabaseAnonKey
+        };
+
+        // Логируем инициализацию в режиме разработки
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('✅ Supabase Config инициализирован');
+            console.log('URL:', supabaseUrl);
+        }
+    </script>
+    
+    <script src="js/pwa.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/map.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+# ============================================================
+# .gitignore для проекта "Карта Апрашки"
+# ============================================================
+
+# Переменные окружения
+.env
+.env.local
+.env.*.local
+*.env
+
+# Конфигурация проекта (с секретами)
+js/config.js
+
+# IDE и редакторы
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Зависимости из npm/yarn/pnpm
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Логи
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Финалы сборки (если есть)
+dist/
+build/
+out/
+.nuxt/
+.cache/
+.vuepress/dist/
+.serverless/
+.fusebox/
+.dynamodb/
+.tern-port
+.env.test
+.env.production.local
+
+# OS
+Thumbs.db
+.AppleDouble
+.LSOverride
+*.iml
+
+# Локальные файлы конфигурации
+config.local.js
+local-settings.json
+
+# Кэш
+.eslintcache
+.stylelintcache
+
+# Supabase (локальный)
+.supabase/
+
+# Резервные копии
+*.backup
+*.bak
+*.orig
+*.tmp
+
+# IDE специфичные файлы
+.vscode/launch.json
+.vscode/task.json
+.vs/
+
+# Временные файлы
+tmp/
+temp/
+*.temp

@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Детальная информация о павильоне в Апраксином дворе">
+    <meta name="theme-color" content="#000000">
+    <title>Павильон — Карта Апрашки</title>
+    
+    <!-- Supabase Configuration (передается через meta теги для безопасности) -->
+    <meta name="supabase-anon-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhZ3B1dWNkbmtyendzbW5ieW1rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MDMxMjYsImV4cCI6MjA4NjA3OTEyNn0.T3vFY9VfxIQ19AtWPkwk6xiqAZe6sEzG-Ke73olUPsY">
+    <meta name="supabase-url" content="https://qagpuucdnkrzwsmnbymk.supabase.co">
+    
+    <!-- Инициализация конфигурации Supabase из <meta> тегов -->
+    <script>
+      // Инициализация конфигурации Supabase из <meta> тегов
+      window.SupabaseConfig = {
+        url: document.querySelector('meta[name="supabase-url"]').content,
+        anonKey: document.querySelector('meta[name="supabase-anon-key"]').content
+      };
+    </script>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-mobile-web-app-status-bar-style" content="black">
+    
+    <!-- Стили -->
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* ============================================================
+           СТРАНИЦА ПАВИЛЬОНА - СПЕЦИФИЧНЫЕ СТИЛИ
+           ============================================================ */
+
+        /* РЕКЛАМНЫЙ БАННЕР */
+        .ad-banner {
+          position: fixed;
+          top: var(--spacing-lg);
+          right: var(--spacing-lg);
+          background: var(--color-secondary);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-lg);
+          box-shadow: var(--shadow-lg);
+          z-index: var(--z-modal) - 1;
+          overflow: hidden;
+        }
+
+        .ad-close {
+          position: absolute;
+          top: var(--spacing-sm);
+          right: var(--spacing-sm);
+          background: none;
+          border: none;
+          font-size: var(--font-size-lg);
+          cursor: pointer;
+          color: var(--color-text-light);
+          padding: var(--spacing-xs);
+          z-index: 10;
+          transition: all var(--transition-fast);
+        }
+
+        .ad-close:hover {
+          color: var(--color-primary);
+        }
+
+        @media (min-width: 1200px) {
+          .ad-banner {
+            width: 300px;
+            height: 250px;
+          }
+        }
+
+        @media (max-width: 1200px) {
+          .ad-banner {
+            width: 320px;
+            height: 100px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .ad-banner {
+            width: 100%;
+            height: auto;
+            max-height: 150px;
+            left: 0;
+            right: 0;
+            top: auto;
+            bottom: 0;
+            margin: var(--spacing-md);
+            border-radius: var(--radius-lg);
+          }
+        }
+
+        /* ПРЕМИУМ БЕЙДЖ */
+        .premium-badge {
+          display: inline-block;
+          padding: var(--spacing-xs) var(--spacing-sm);
+          background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+          color: #000;
+          border-radius: var(--radius-full);
+          font-weight: var(--font-weight-bold);
+          font-size: var(--font-size-sm);
+          box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+        }
+
+        /* ШАПКА ПАВИЛЬОНА */
+        .pavilion-header {
+          background: var(--color-primary);
+          color: var(--color-secondary);
+          padding: var(--spacing-lg);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .pavilion-hero {
+          width: 100%;
+          height: 200px;
+          object-fit: cover;
+          display: block;
+          background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
+          border-bottom: 3px solid var(--color-accent);
+        }
+
+        .pavilion-hero.placeholder {
+          background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
+          width: 100%;
+          height: 200px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: var(--font-size-4xl);
+          color: var(--color-secondary);
+        }
+
+        .pavilion-info {
+          padding: var(--spacing-lg);
+          background: var(--color-secondary);
+          border-bottom: 1px solid var(--color-border);
+        }
+
+        .pavilion-title {
+          font-size: var(--font-size-3xl);
+          font-weight: var(--font-weight-bold);
+          color: var(--color-primary);
+          margin-bottom: var(--spacing-md);
+          margin: 0;
+        }
+
+        .pavilion-meta {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--spacing-md);
+          font-size: var(--font-size-base);
+          color: var(--color-text-light);
+          margin-bottom: var(--spacing-md);
+        }
+
+        .pavilion-meta-item {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+        }
+
+        .pavilion-category {
+          display: inline-block;
+          padding: var(--spacing-sm) var(--spacing-md);
+          background: var(--color-accent);
+          color: var(--color-secondary);
+          border-radius: var(--radius-full);
+          font-weight: var(--font-weight-semibold);
+          font-size: var(--font-size-sm);
+        }
+
+        .pavilion-owner {
+          padding: var(--spacing-md);
+          background: var(--color-bg-lighter);
+          border-radius: var(--radius-md);
+          font-size: var(--font-size-sm);
+          color: var(--color-text-light);
+        }
+
+        .pavilion-owner-name {
+          color: var(--color-primary);
+          font-weight: var(--font-weight-semibold);
+        }
+
+        /* КНОПКИ ДЕЙСТВИЙ */
+        .actions-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+          gap: var(--spacing-md);
+          padding: var(--spacing-lg);
+          background: var(--color-secondary);
+          border-bottom: 1px solid var(--color-border);
+        }
+
+        .action-btn {
+          padding: var(--spacing-md) var(--spacing-sm);
+          background: var(--color-accent);
+          color: var(--color-secondary);
+          border: none;
+          border-radius: var(--radius-md);
+          cursor: pointer;
+          font-size: var(--font-size-sm);
+          font-weight: var(--font-weight-semibold);
+          transition: all var(--transition-fast);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: var(--spacing-xs);
+          text-decoration: none;
+        }
+
+        .action-btn:hover {
+          background: #E5602E;
+          box-shadow: var(--shadow-lg);
+          transform: translateY(-2px);
+        }
+
+        .action-btn:active {
+          transform: translateY(0);
+        }
+
+        .action-btn:focus-visible {
+          outline: 2px solid var(--color-primary);
+          outline-offset: 2px;
+        }
+
+        .action-icon {
+          font-size: var(--font-size-2xl);
+        }
+
+        .action-label {
+          font-size: var(--font-size-xs);
+          text-align: center;
+        }
+
+        /* РАЗДЕЛ */
+        .section {
+          padding: var(--spacing-lg);
+          background: var(--color-secondary);
+          border-bottom: 1px solid var(--color-border);
+        }
+
+        .section-title {
+          font-size: var(--font-size-2xl);
+          font-weight: var(--font-weight-bold);
+          color: var(--color-primary);
+          margin-bottom: var(--spacing-lg);
+          padding-bottom: var(--spacing-md);
+          border-bottom: 2px solid var(--color-accent);
+        }
+
+        /* РАЗДЕЛ ПРЕМИУМ */
+        .premium-only {
+          position: relative;
+        }
+
+        .premium-only::after {
+          content: '⭐ Премиум функция';
+          position: absolute;
+          top: var(--spacing-md);
+          right: var(--spacing-md);
+          font-size: var(--font-size-xs);
+          color: var(--color-text-light);
+          display: none;
+        }
+
+        /* СКИДКИ */
+        .discounts-list {
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-md);
+        }
+
+        .discount-card {
+          padding: var(--spacing-md);
+          border: 2px solid var(--color-accent);
+          border-radius: var(--radius-lg);
+          background: rgba(255, 107, 53, 0.05);
+          transition: all var(--transition-fast);
+        }
+
+        .discount-card:hover {
+          box-shadow: var(--shadow-lg);
+          border-color: #E5602E;
+        }
+
+        .discount-card.multi-discount {
+          border-style: dashed;
+        }
+
+        .discount-title {
+          font-size: var(--font-size-lg);
+          font-weight: var(--font-weight-semibold);
+          color: var(--color-primary);
+          margin-bottom: var(--spacing-sm);
+        }
+
+        .discount-badge {
+          display: inline-block;
+          padding: var(--spacing-xs) var(--spacing-sm);
+          background: var(--color-accent);
+          color: var(--color-secondary);
+          border-radius: var(--radius-full);
+          font-size: var(--font-size-xs);
+          font-weight: var(--font-weight-semibold);
+          margin-bottom: var(--spacing-sm);
+        }
+
+        .discount-description {
+          font-size: var(--font-size-base);
+          color: var(--color-text);
+          margin-bottom: var(--spacing-sm);
+        }
+
+        .discount-categories {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--spacing-sm);
+          margin-bottom: var(--spacing-sm);
+        }
+
+        .discount-category-chip {
+          padding: var(--spacing-xs) var(--spacing-sm);
+          background: var(--color-bg-light);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
+          font-size: var(--font-size-xs);
+          color: var(--color-text-light);
+        }
+
+        .discount-meta {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--spacing-md);
+          font-size: var(--font-size-sm);
+          color: var(--color-text-light);
+        }
+
+        .discount-meta-item {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-xs);
+        }
+
+        /* КАТЕГОРИИ */
+        .categories-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--spacing-sm);
+        }
+
+        .category-badge {
+          display: inline-block;
+          padding: var(--spacing-sm) var(--spacing-md);
+          background: var(--color-bg-light);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
+          color: var(--color-primary);
+          font-size: var(--font-size-sm);
+          transition: all var(--transition-fast);
+        }
+
+        .category-badge:hover {
+          background: var(--color-accent);
+          color: var(--color-secondary);
+          border-color: var(--color-accent);
+        }
+
+        /* КОНТАКТЫ */
+        .contacts-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          gap: var(--spacing-md);
+          margin-top: var(--spacing-lg);
+        }
+
+        .contact-btn {
+          padding: var(--spacing-md);
+          background: var(--color-bg-light);
+          border: 2px solid var(--color-border);
+          border-radius: var(--radius-md);
+          cursor: pointer;
+          text-decoration: none;
+          color: var(--color-primary);
+          font-weight: var(--font-weight-semibold);
+          transition: all var(--transition-fast);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--spacing-sm);
+          font-size: var(--font-size-base);
+        }
+
+        .contact-btn:hover {
+          background: var(--color-accent);
+          color: var(--color-secondary);
+          border-color: var(--color-accent);
+        }
+
+        .contact-btn:focus-visible {
+          outline: 2px solid var(--color-primary);
+          outline-offset: 2px;
+        }
+
+        /* ПУСТОЕ СОСТОЯНИЕ */
+        .empty-state {
+          text-align: center;
+          padding: var(--spacing-xl);
+          color: var(--color-text-light);
+        }
+
+        .empty-state-icon {
+          font-size: var(--font-size-4xl);
+          margin-bottom: var(--spacing-md);
+        }
+
+        /* СТАТИСТИКА (премиум) */
+        .stats-container {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+          gap: var(--spacing-md);
+          padding: var(--spacing-md);
+          background: var(--color-bg-lighter);
+          border-radius: var(--radius-md);
+          border-top: 1px solid var(--color-border);
+          margin-top: var(--spacing-lg);
+        }
+
+        .stat-item {
+          text-align: center;
+        }
+
+        .stat-number {
+          font-size: var(--font-size-2xl);
+          font-weight: var(--font-weight-bold);
+          color: var(--color-accent);
+        }
+
+        .stat-label {
+          font-size: var(--font-size-xs);
+          color: var(--color-text-light);
+          text-transform: uppercase;
+        }
+
+        /* ФУТЕР */
+        .pavilion-footer {
+          background: var(--color-primary);
+          color: var(--color-secondary);
+          padding: var(--spacing-lg);
+          text-align: center;
+          border-top: 1px solid var(--color-border);
+        }
+
+        .pavilion-footer-brand {
+          font-size: var(--font-size-lg);
+          font-weight: var(--font-weight-bold);
+          margin-bottom: var(--spacing-md);
+        }
+
+        .pavilion-footer-link {
+          color: var(--color-accent);
+          text-decoration: none;
+          font-size: var(--font-size-sm);
+          transition: all var(--transition-fast);
+        }
+
+        .pavilion-footer-link:hover {
+          text-decoration: underline;
+        }
+
+        /* СТАТУС ЗАГРУЗКИ */
+        .loading {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: var(--spacing-xl);
+          min-height: 400px;
+          font-size: var(--font-size-xl);
+          color: var(--color-text-light);
+        }
+
+        .error {
+          background: #FFEBEE;
+          color: #C62828;
+          padding: var(--spacing-lg);
+          border-radius: var(--radius-md);
+          border-left: 4px solid #D32F2F;
+          margin: var(--spacing-lg);
+        }
+
+        /* АДАПТИВНОСТЬ */
+        @media (min-width: 1200px) {
+          .pavilion-header {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: var(--spacing-lg);
+            padding: 0;
+          }
+
+          .pavilion-hero {
+            border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+            height: 100%;
+            min-height: 400px;
+          }
+
+          .pavilion-info {
+            padding: var(--spacing-xl);
+            border-bottom: none;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .pavilion-title {
+            font-size: var(--font-size-2xl);
+          }
+
+          .pavilion-meta {
+            font-size: var(--font-size-sm);
+          }
+
+          .actions-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          .section {
+            padding: var(--spacing-md);
+          }
+
+          .section-title {
+            font-size: var(--font-size-xl);
+          }
+
+          .discount-card {
+            padding: var(--spacing-sm);
+          }
+
+          .contacts-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .stats-container {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        @media (max-width: 480px) {
+          .pavilion-title {
+            font-size: var(--font-size-xl);
+          }
+
+          .pavilion-hero {
+            height: 150px;
+          }
+
+          .pavilion-meta {
+            font-size: var(--font-size-xs);
+            gap: var(--spacing-sm);
+          }
+
+          .actions-grid {
+            grid-template-columns: 1fr;
+            gap: var(--spacing-sm);
+          }
+
+          .action-btn {
+            padding: var(--spacing-md);
+          }
+
+          .contacts-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .stats-container {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          * {
+            animation-duration: 0 !important;
+            transition-duration: 0 !important;
+          }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- РЕКЛАМНЫЙ БАННЕР -->
+        <div class="ad-banner" id="ad-banner" style="display: none;">
+            <button class="ad-close" onclick="closeAdBanner()">✕</button>
+            <div id="ad-container" style="width: 100%; height: 100%;"></div>
+        </div>
+
+        <!-- ШАПКА СТРАНИЦЫ -->
+        <header class="pavilion-header" id="pavilion-header">
+            <div class="pavilion-hero placeholder" id="pavilion-hero">🏪</div>
+            <div class="pavilion-info">
+                <div style="display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-md);">
+                    <h1 class="pavilion-title" id="pavilion-name">Загрузка...</h1>
+                    <span class="premium-badge" id="premium-badge" style="display: none;">⭐ Премиум</span>
+                </div>
+                
+                <div class="pavilion-meta">
+                    <div class="pavilion-meta-item">
+                        <span id="pavilion-category">—</span>
+                    </div>
+                    <div class="pavilion-meta-item">
+                        📍 <span id="pavilion-location">—</span>
+                    </div>
+                    <div class="pavilion-meta-item">
+                        🏢 <span id="pavilion-floor">—</span>
+                    </div>
+                </div>
+
+                <div class="pavilion-owner">
+                    <p style="margin: 0;">
+                        <span style="color: var(--color-text-light);">Владелец:</span>
+                        <span class="pavilion-owner-name" id="pavilion-owner">—</span>
+                    </p>
+                </div>
+            </div>
+        </header>
+
+        <!-- КНОПКИ ДЕЙСТВИЙ -->
+        <div class="actions-grid">
+            <button class="action-btn" onclick="showOnMap()" title="Показать на карте">
+                <span class="action-icon">🗺️</span>
+                <span class="action-label">На карте</span>
+            </button>
+            <button class="action-btn" onclick="sharePavilion()" title="Поделиться">
+                <span class="action-icon">🔗</span>
+                <span class="action-label">Поделиться</span>
+            </button>
+            <button class="action-btn" onclick="getRoute()" title="Как добраться">
+                <span class="action-icon">🚶</span>
+                <span class="action-label">Как добраться</span>
+            </button>
+            <a class="action-btn" id="call-btn" href="tel:" title="Позвонить" style="display: none;">
+                <span class="action-icon">☎️</span>
+                <span class="action-label">Позвонить</span>
+            </a>
+            <a class="action-btn" id="message-btn" href="#" title="Написать сообщение" style="display: none;">
+                <span class="action-icon">💬</span>
+                <span class="action-label">Написать</span>
+            </a>
+        </div>
+
+        <!-- РАЗДЕЛ СКИДОК (только для премиум) -->
+        <section class="section premium-only" id="discounts-section" style="display: none;">
+            <h2 class="section-title">✨ Скидки и предложения</h2>
+            <div class="discounts-container" id="discounts-container">
+                <div class="discounts-list" id="discounts-list">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📦</div>
+                    <p>Скидок нет</p>
+                </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- РАЗДЕЛ КАТЕГОРИЙ -->
+        <section class="section" id="categories-container">
+            <h2 class="section-title">📂 Категория товаров</h2>
+            <p style="font-size: var(--font-size-base); color: var(--color-text); margin: 0;">
+                <span class="pavilion-category" id="pavilion-category-large">—</span>
+            </p>
+            
+            <!-- Дополнительные категории (только для премиум) -->
+            <div id="additional-categories" style="display: none; margin-top: var(--spacing-lg);">
+                <p style="font-size: var(--font-size-sm); color: var(--color-text-light); margin-bottom: var(--spacing-sm);">Дополнительные категории:</p>
+                <div class="categories-list" id="additional-categories-list"></div>
+            </div>
+        </section>
+
+        <!-- РАЗДЕЛ КОНТАКТОВ (только для премиум) -->
+        <section class="section premium-only" id="contacts-section" style="display: none;">
+            <h2 class="section-title">📞 Контакты</h2>
+            <div class="contacts-container" id="contacts-container">
+                <div class="contacts-grid">
+                <a class="contact-btn" id="contact-message" href="#">
+                    💬 Написать владельцу
+                </a>
+                <a class="contact-btn" id="contact-call" href="tel:">
+                    ☎️ Позвонить
+                </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- СТАТИСТИКА ПРОСМОТРОВ (премиум) -->
+        <section class="section premium-only" id="stats-section" style="display: none;">
+            <h2 class="section-title">📊 Статистика</h2>
+            <div class="stats-container">
+                <div class="stat-item">
+                    <div class="stat-number" id="stat-views">0</div>
+                    <div class="stat-label">Просмотров</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="stat-shares">0</div>
+                    <div class="stat-label">Поделились</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="stat-contacts">0</div>
+                    <div class="stat-label">Контактов</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ФУТЕР -->
+        <footer class="pavilion-footer">
+            <div class="pavilion-footer-brand">🏪 Карта Апрашки</div>
+            <a href="/" class="pavilion-footer-link">← Вернуться на главную</a>
+        </footer>
+    </div>
+
+    <script src="js/pwa.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/pavilion.js"></script>
+
+    <script>
+        // Pavilion API инициализируется автоматически в pavilion.js через DOMContentLoaded
+        // Дополнительная инициализация (если требуется):
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.Pavilion && typeof window.Pavilion.init === 'function') {
+                try {
+                    // pavilion.js уже инициализируется, это для подстраховки
+                    console.log('Pavilion: API готов к использованию');
+                } catch (e) {
+                    console.error('Pavilion API error:', e);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
