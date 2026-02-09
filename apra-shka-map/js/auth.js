@@ -73,6 +73,8 @@ async function initAuth() {
       AuthConfig.SUPABASE_URL = window.SupabaseConfig.url;
       AuthConfig.SUPABASE_ANON_KEY = window.SupabaseConfig.anonKey;
       console.log('✅ Auth: Конфигурация Supabase загружена из window.SupabaseConfig');
+      console.log('  📍 URL:', AuthConfig.SUPABASE_URL);
+      console.log('  🔑 Ключ API (первые 20 символов):', AuthConfig.SUPABASE_ANON_KEY.substring(0, 20) + '...');
     } else {
       // Fallback: получаем из <meta> тегов
       const urlMeta = document.querySelector('meta[name="supabase-url"]');
@@ -82,6 +84,8 @@ async function initAuth() {
         AuthConfig.SUPABASE_URL = urlMeta.content;
         AuthConfig.SUPABASE_ANON_KEY = keyMeta.content;
         console.log('✅ Auth: Конфигурация Supabase загружена из <meta> тегов');
+        console.log('  📍 URL:', AuthConfig.SUPABASE_URL);
+        console.log('  🔑 Ключ API (первые 20 символов):', AuthConfig.SUPABASE_ANON_KEY.substring(0, 20) + '...');
       } else {
         throw new Error('Конфигурация Supabase не найдена. Проверьте наличие window.SupabaseConfig или <meta> тегов в HTML');
       }
@@ -154,12 +158,20 @@ async function checkPhone(phone) {
   try {
     // Валидируем номер перед отправкой в БД
     if (!validatePhoneNumber(phone)) {
+      console.error('❌ Auth: Неверный формат номера телефона. Ожидается: +7XXXXXXXXXX');
       throw new Error('Неверный формат номера телефона');
     }
     
+    console.log('✅ Формат номера валиден');
+    
+    // Формируем URL для запроса
+    const url = `${AuthConfig.SUPABASE_URL}/rest/v1/${AuthConfig.DB_TABLE_TENANTS}?phone=eq.${encodeURIComponent(phone)}&select=*`;
+    console.log('📍 URL запроса:', url);
+    console.log('🔑 Ключ API (первые 20 символов):', AuthConfig.SUPABASE_ANON_KEY.substring(0, 20) + '...');
+    
     // Запрос к Supabase REST API (без необходимости в клиенте)
     const response = await fetch(
-      `${AuthConfig.SUPABASE_URL}/rest/v1/${AuthConfig.DB_TABLE_TENANTS}?phone=eq.${phone}&select=*`,
+      url,
       {
         method: 'GET',
         headers: {
@@ -169,23 +181,40 @@ async function checkPhone(phone) {
       }
     );
     
+    console.log('📊 Статус ответа:', response.status);
+    console.log('📝 Заголовки ответа:', {
+      'content-type': response.headers.get('content-type'),
+      'content-range': response.headers.get('content-range')
+    });
+    
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+      console.error('❌ HTTP ошибка:', errorText);
+      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
     }
     
     const data = await response.json();
+    console.log('📦 Полученные данные:', data);
+    console.log('📊 Количество записей:', data?.length || 0);
     
     // Если номер не найден в БД
     if (!data || data.length === 0) {
-      console.warn('⚠️ Auth: Номер не найден в базе данных');
+      console.warn('⚠️ Auth: Номер не найден в базе данных (никаких записей)');
       return null;
     }
     
     const tenant = data[0];
+    console.log('👤 Найдная запись:', {
+      id: tenant.id,
+      name: tenant.name,
+      phone: tenant.phone,
+      approved: tenant.approved,
+      email: tenant.email || 'нет'
+    });
     
     // Проверяем статус одобрения
     if (!tenant.approved) {
-      console.warn('⚠️ Auth: Аккаунт не одобрен администратором');
+      console.warn('⚠️ Auth: Аккаунт не одобрен администратором (approved = false)');
       return null;
     }
     
@@ -194,6 +223,7 @@ async function checkPhone(phone) {
     
   } catch (error) {
     console.error('❌ Auth: Ошибка при проверке номера', error);
+    console.error('📋 Полная ошибка:', error.message, error.stack);
     throw error;
   }
 }
@@ -207,7 +237,17 @@ async function checkPhone(phone) {
 function validatePhoneNumber(phone) {
   // Проверяем формат +7XXXXXXXXXX (11 цифр)
   const phoneRegex = /^\+7\d{10}$/;
-  return phoneRegex.test(phone.trim());
+  const trimmed = phone.trim();
+  const isValid = phoneRegex.test(trimmed);
+  if (!isValid) {
+    console.log('❌ Валидация не прошла:', {
+      input: phone,
+      trimmed: trimmed,
+      length: trimmed.length,
+      regex: phoneRegex.toString()
+    });
+  }
+  return isValid;
 }
 
 /**
@@ -217,20 +257,30 @@ function validatePhoneNumber(phone) {
  * @returns {string} Форматированный номер +7XXXXXXXXXX
  */
 function formatPhoneNumber(phone) {
+  console.log('🔄 Форматирование номера:', {
+    input: phone,
+    length: phone.length
+  });
+  
   // Удаляем все нецифровые символы
   const digitsOnly = phone.replace(/\D/g, '');
+  console.log('  └─ Только цифры:', digitsOnly, '(' + digitsOnly.length + ' цифр)');
   
   // Если начинается с 8, заменяем на 7 (для российских номеров)
   const normalized = digitsOnly.startsWith('8')
     ? '7' + digitsOnly.slice(1)
     : digitsOnly;
+  console.log('  └─ Нормализовано:', normalized, '(' + normalized.length + ' цифр)');
   
   // Проверяем, что это 11 цифр (для России)
   if (normalized.length !== 11) {
+    console.error('  ❌ Неверная длина:', normalized.length, 'вместо 11 цифр');
     throw new Error('Номер должен содержать 11 цифр');
   }
   
-  return `+${normalized}`;
+  const formatted = `+${normalized}`;
+  console.log('  ✅ Результат:', formatted);
+  return formatted;
 }
 
 /**
@@ -253,24 +303,32 @@ async function handleLoginFormSubmit(event) {
     }
     
     const phone = phoneInput.value;
-    console.log('📱 Введён номер телефона:', phone);
+    console.log('📱 Введён номер телефона (сырой):', phone);
+    console.log('📝 Длина номера:', phone.length, 'символов');
     
     // Форматируем номер
     const formattedPhone = formatPhoneNumber(phone);
-    console.log('✏️ Отформатирован номер:', formattedPhone);
+    console.log('✅ Отформатирован номер:', formattedPhone);
+    console.log('✓ Формат: +7 + 10 цифр =', formattedPhone.length, 'символов');
     
     // Проверяем номер в БД
+    console.log('🔄 Отправляем запрос в Supabase...');
     const tenant = await checkPhone(formattedPhone);
     
     if (!tenant) {
       // Номер не найден или не одобрен
       console.log('❌ Номер не найден или не одобрен');
+      console.log('💡 Убедитесь, что:');
+      console.log('   1. Номер существует в таблице tenants');
+      console.log('   2. Поле approved имеет значение true');
+      console.log('   3. Ключ API работает (проверьте Supabase Settings > API Keys)');
       showAuthError('Свяжитесь с Администрацией Апраксиного двора');
       AuthState.isLoading = false;
       return;
     }
     
     console.log('✅ Аутентификация успешна, сохраняю сессию');
+    console.log('👤 Сессия для:', tenant.name, '(' + tenant.phone + ')');
     
     // Успешная аутентификация - сохраняем сессию
     await createSession(tenant);
@@ -286,6 +344,8 @@ async function handleLoginFormSubmit(event) {
     
   } catch (error) {
     console.error('❌ Auth: Ошибка входа', error);
+    console.error('📋 Описание ошибки:', error.message);
+    console.error('🔍 Stack trace:', error.stack);
     showAuthError(error.message || 'Ошибка при входе. Попробуйте ещё раз');
   } finally {
     AuthState.isLoading = false;
