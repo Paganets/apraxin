@@ -344,28 +344,62 @@
         // Управление модальным окном входа (открытие по #login и локальные кнопки)
         (function(){
             function showLoginModal(){
+                console.log('📲 Открываю модальное окно входа');
                 const m = document.getElementById('login-modal');
-                if(!m) return;
+                if(!m) {
+                    console.error('❌ Ошибка: элемент #login-modal не найден в DOM');
+                    return;
+                }
                 m.style.display = 'flex';
+                console.log('✅ Модальное окно входа открыто');
+                // Фокусируем первый input для удобства
+                const phoneInput = document.getElementById('phone-input');
+                if (phoneInput) {
+                    phoneInput.focus();
+                    console.log('🎯 Фокус установлен на поле ввода номера');
+                }
             }
             function hideLoginModal(){
+                console.log('🚪 Закрываю модальное окно входа');
                 const m = document.getElementById('login-modal');
                 if(!m) return;
                 m.style.display = 'none';
                 try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch(e){}
+                console.log('✅ Модальное окно закрыто');
             }
 
             document.addEventListener('DOMContentLoaded', ()=>{
-                if(window.location.hash === '#login') showLoginModal();
+                console.log('📄 DOMContentLoaded: инициализирую управление модальным окном');
+                
+                if(window.location.hash === '#login') {
+                    console.log('🔗 Найден хеш #login, открываю модальное окно');
+                    showLoginModal();
+                }
 
                 window.addEventListener('hashchange', ()=>{
-                    if(window.location.hash === '#login') showLoginModal(); else hideLoginModal();
+                    console.log('🔗 Хеш изменился:', window.location.hash);
+                    if(window.location.hash === '#login') {
+                        showLoginModal();
+                    } else {
+                        hideLoginModal();
+                    }
                 });
 
                 const close = document.getElementById('login-modal-close');
-                if(close) close.addEventListener('click', hideLoginModal);
+                if(close) {
+                    close.addEventListener('click', ()=>{
+                        console.log('❌ Нажата кнопка закрытия модального окна');
+                        hideLoginModal();
+                    });
+                }
+                
                 const cancel = document.getElementById('login-cancel');
-                if(cancel) cancel.addEventListener('click', hideLoginModal);
+                if(cancel) {
+                    cancel.addEventListener('click', ()=>{
+                        console.log('❌ Нажата кнопка "Отмена"');
+                        hideLoginModal();
+                    });
+                }
 
                 // если auth.js перенаправляет к #login (handleAuthButtonClick), форма откроется автоматически
             });

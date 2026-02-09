@@ -240,6 +240,7 @@ function formatPhoneNumber(phone) {
  */
 async function handleLoginFormSubmit(event) {
   event.preventDefault();
+  console.log('📤 Форма входа отправлена');
   
   try {
     AuthState.isLoading = true;
@@ -252,19 +253,24 @@ async function handleLoginFormSubmit(event) {
     }
     
     const phone = phoneInput.value;
+    console.log('📱 Введён номер телефона:', phone);
     
     // Форматируем номер
     const formattedPhone = formatPhoneNumber(phone);
+    console.log('✏️ Отформатирован номер:', formattedPhone);
     
     // Проверяем номер в БД
     const tenant = await checkPhone(formattedPhone);
     
     if (!tenant) {
       // Номер не найден или не одобрен
+      console.log('❌ Номер не найден или не одобрен');
       showAuthError('Свяжитесь с Администрацией Апраксиного двора');
       AuthState.isLoading = false;
       return;
     }
+    
+    console.log('✅ Аутентификация успешна, сохраняю сессию');
     
     // Успешная аутентификация - сохраняем сессию
     await createSession(tenant);
@@ -273,8 +279,9 @@ async function handleLoginFormSubmit(event) {
     event.target.reset();
     
     // Перенаправляем в админ-панель или главную страницу
+    console.log('🚀 Переходу в админ-панель');
     setTimeout(() => {
-      window.location.href = '/admin.html';
+      window.location.href = 'admin.html';
     }, 500);
     
   } catch (error) {
@@ -289,12 +296,16 @@ async function handleLoginFormSubmit(event) {
  * Обработчик клика на кнопку входа в header
  */
 function handleAuthButtonClick() {
+  console.log('🔘 Кнопка Вход нажата');
+  
   if (AuthState.currentTenant) {
     // Если уже авторизован - показываем профиль/меню
+    console.log('👤 Пользователь уже авторизован, открываю меню');
     showUserMenu();
   } else {
-    // Иначе - перенаправляем на страницу входа
-    window.location.href = '/index.html#login';
+    // Иначе - открываем модальное окно входа через хеш
+    console.log('🔓 Открываю модальное окно входа');
+    window.location.hash = '#login';
   }
 }
 
