@@ -13,7 +13,6 @@
     
     <!-- Инициализация конфигурации Supabase из <meta> тегов -->
     <script>
-      // Инициализация конфигурации Supabase из <meta> тегов
       window.SupabaseConfig = {
         url: document.querySelector('meta[name="supabase-url"]').content,
         anonKey: document.querySelector('meta[name="supabase-anon-key"]').content
@@ -136,26 +135,6 @@
                         <img id="image-preview" class="image-preview" style="display: none;">
                     </div>
 
-                    <!-- ВХОДЫ В ЗДАНИЕ -->
-                    <div class="form-group">
-                        <label>Входы в здание</label>
-                        <div id="entrances-container" style="margin-bottom: var(--spacing-md);">
-                            <div id="entrances-list">
-                                <small>Входы будут отображены после сохранения павильона</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- КООРДИНАТЫ (только чтение) -->
-                    <div class="form-group">
-                        <label>Координаты на карте</label>
-                        <p style="font-size: var(--font-size-sm); color: var(--color-text-light);">
-                            Нажимайте на карту справа для установки координат
-                        </p>
-                        <input type="hidden" id="pavilion-x">
-                        <input type="hidden" id="pavilion-y">
-                    </div>
-
                     <!-- СКИДКИ -->
                     <div class="form-group">
                         <label>Скидки и предложения</label>
@@ -183,7 +162,7 @@
             <div class="preview-panel">
                 <h2 class="admin-section-title">🗺️ Карта</h2>
 
-                    <!-- ВЫБОР ЭТАЖА -->
+                <!-- ВЫБОР ЭТАЖА -->
                 <div class="map-section">
                     <h3>Выберите этаж:</h3>
                     <div class="floor-selector" id="floor-selector">
@@ -201,7 +180,6 @@
                         <div class="map-hint">
                             <p>📍 Нажмите на карте, чтобы установить локацию павильона</p>
                         </div>
-                        <!-- mini-map element required by admin.js -->
                         <div id="mini-map" style="width:100%; height:300px;"></div>
                     </div>
                 </div>
@@ -209,7 +187,7 @@
                 <!-- ИНФОРМАЦИЯ -->
                 <div style="margin-top: var(--spacing-lg); padding: var(--spacing-md); background: var(--color-bg-light); border-radius: var(--radius-md);">
                     <p style="font-size: var(--font-size-sm); margin: 0;">
-                        <strong>💡 Совет:</strong> Кликните на карте справа в нужное место, чтобы установить координаты вашего павильона. Номер будет заполнен автоматически.
+                        <strong>💡 Совет:</strong> Кликните на карте справа в нужное место, чтобы установить координаты вашего павильона.
                     </p>
                 </div>
             </div>
@@ -219,7 +197,7 @@
         <section class="pavilions-list-section">
             <h2 class="admin-section-title">📋 Мои павильоны</h2>
             
-                <div style="overflow-x: auto;">
+            <div style="overflow-x: auto;">
                 <table class="pavilions-table" id="pavilions-table">
                     <thead>
                         <tr>
@@ -231,11 +209,10 @@
                             <th>Действия</th>
                         </tr>
                     </thead>
-                    <tbody id="pavilions-table-body"></tbody>
-                    <tbody id="pavilions-list">
+                    <tbody id="pavilions-table-body">
                         <tr>
                             <td colspan="6" style="text-align: center; padding: var(--spacing-lg); color: var(--color-text-light);">
-                                Нет павильонов. Создайте первый павильон выше.
+                                Загрузка павильонов...
                             </td>
                         </tr>
                     </tbody>
@@ -286,284 +263,52 @@
         // ============================================================
         // ИНИЦИАЛИЗАЦИЯ АДМИН-ПАНЕЛИ
         // ============================================================
-
         document.addEventListener('DOMContentLoaded', () => {
             console.log('🚀 Admin: Инициализация админ-панели');
             
-            // Проверяем авторизацию
-            if (!window.Auth?.requireAuth?.()) {
-                return;
+            // Используем API из admin.js
+            if (window.Admin && typeof window.Admin.init === 'function') {
+                try {
+                    window.Admin.init();
+                } catch (error) {
+                    console.error('❌ Admin: Ошибка инициализации', error);
+                }
+            } else {
+                console.warn('⚠️ Admin: window.Admin.init не найден');
             }
-            
-            // Обновляем информацию пользователя
-            updateUserInfo();
-            
-            // Подключаем обработчики событий
-            setupEventHandlers();
-            
-            // Загружаем список павильонов
-            loadPavilions();
-            
-            // Обновляем статистику
-            updateStats();
         });
 
         // ============================================================
-        // УПРАВЛЕНИЕ ИНТЕРФЕЙСОМ ПОЛЬЗОВАТЕЛЯ
+        // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ UI
         // ============================================================
 
-        /**
-         * Обновляет информацию о текущем пользователе в шапке
-         */
-        function updateUserInfo() {
-            const tenant = window.Auth?.getCurrentTenant?.();
-            if (tenant) {
-                document.getElementById('user-name').textContent = `👤 ${tenant.name}`;
-            }
-        }
-
-        /**
-         * Подключает обработчики событий формы и интерфейса
-         */
-        function setupEventHandlers() {
-            // Форма павильона
-            document.getElementById('pavilion-form').addEventListener('submit', handleSavePavilion);
-
-            // Выбор категории
-            document.querySelectorAll('.category-chip').forEach(chip => {
-                chip.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
-                    chip.classList.add('active');
-                    document.getElementById('category-input').value = chip.dataset.category;
-                });
-            });
-
-            // Выбор цвета
-            document.querySelectorAll('.color-option').forEach(option => {
-                option.addEventListener('click', () => {
-                    document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
-                    option.classList.add('selected');
-                    document.getElementById('brand-color-input').value = option.dataset.color;
-                });
-            });
-
-            // Загрузка изображения
-            document.getElementById('image-input').addEventListener('change', handleImageUpload);
-
-            // Форма скидки
-            document.getElementById('discount-form').addEventListener('submit', handleAddDiscount);
-        }
-
-        /**
-         * Обрабатывает загрузку изображения
-         */
-        function handleImageUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            // Проверяем размер (макс 2 МБ)
-            if (file.size > 2 * 1024 * 1024) {
-                alert('❌ Файл слишком большой! Максимум 2 МБ');
-                return;
-            }
-
-            // Показываем предпросмотр
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const preview = document.getElementById('image-preview');
-                preview.src = event.target.result;
-                preview.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        }
-
-        /**
-         * Обрабатывает сохранение павильона
-         */
-        async function handleSavePavilion(e) {
-            e.preventDefault();
-
-            try {
-                const data = {
-                    floor: document.getElementById('floor-input').value,
-                    location: document.getElementById('location-input').value,
-                    name: document.getElementById('name-input').value,
-                    category: document.getElementById('category-input').value,
-                    brand_color: document.getElementById('brand-color-input').value
-                };
-
-                if (!data.category) {
-                    alert('❌ Пожалуйста, выберите категорию');
-                    return;
-                }
-
-                console.log('💾 Admin: Сохранение павильона', data);
-                
-                // Сохраняем в БД через Data API
-                // Здесь будет реальная интеграция с Data.createPavilion() или Data.updatePavilion()
-                alert('✅ Павильон сохранён!');
-                
-                // Перезагружаем список
-                loadPavilions();
-                updateStats();
-
-            } catch (error) {
-                console.error('❌ Admin: Ошибка при сохранении', error);
-                alert('❌ Ошибка при сохранении павильона');
-            }
-        }
-
-        /**
-         * Показывает модальное окно добавления скидки
-         */
         function showAddDiscountModal() {
             document.getElementById('discount-modal').style.display = 'flex';
         }
 
-        /**
-         * Скрывает модальное окно добавления скидки
-         */
         function hideAddDiscountModal() {
             document.getElementById('discount-modal').style.display = 'none';
-            document.getElementById('discount-form').reset();
+            if (document.getElementById('discount-form')) {
+                document.getElementById('discount-form').reset();
+            }
         }
 
-        /**
-         * Обрабатывает добавление скидки
-         */
-        function handleAddDiscount(e) {
-            e.preventDefault();
-
-            const discountData = {
-                title: document.getElementById('discount-title').value,
-                description: document.getElementById('discount-desc').value,
-                endDate: document.getElementById('discount-date').value,
-                product: document.getElementById('discount-product').value
-            };
-
-            console.log('➕ Admin: Добавление скидки', discountData);
-            alert('✅ Скидка добавлена!');
-
-            hideAddDiscountModal();
+        function handleLogout() {
+            if (confirm('Вы уверены, что хотите выйти?')) {
+                if (window.Auth && typeof window.Auth.logout === 'function') {
+                    window.Auth.logout();
+                }
+            }
         }
 
-        /**
-         * Выбирает этаж на мини-карте
-         */
         function selectFloor(floor) {
-            // Удаляем активный класс со всех кнопок
             document.querySelectorAll('.floor-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            // Добавляем активный класс выбранной кнопке
             document.querySelector(`[data-floor="${floor}"]`).classList.add('active');
             
-            // Обновляем выбор этажа в форме
-            document.getElementById('floor-input').value = floor;
-        }
-
-        /**
-         * Обработчик выхода
-         */
-        function handleLogout() {
-            if (confirm('Вы уверены, что хотите выйти?')) {
-                window.Auth?.logout?.();
-            }
-        }
-
-        /**
-         * Загружает список павильонов пользователя
-         */
-        async function loadPavilions() {
-            try {
-                const tenant = window.Auth?.getCurrentTenant?.();
-                if (!tenant) return;
-
-                // Получаем все павильоны и фильтруем по tenant_id
-                const pavilions = await window.Data?.getAllPavilions?.();
-                const myPavilions = pavilions?.filter(p => p.tenant_id === tenant.id) || [];
-
-                const tbody = document.getElementById('pavilions-list');
-                
-                if (myPavilions.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: var(--spacing-lg); color: var(--color-text-light);">
-                                Нет павильонов. Создайте первый павильон выше.
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-
-                tbody.innerHTML = myPavilions.map(p => `
-                    <tr>
-                        <td>${p.floor || '-'}</td>
-                        <td>${p.location || '-'}</td>
-                        <td>${p.name || '-'}</td>
-                        <td>${p.category || '-'}</td>
-                        <td>${(p.discounts?.length || 0)} скидок</td>
-                        <td>
-                            <div class="table-actions">
-                                <button class="btn btn-small btn-primary" onclick="editPavilion('${p.id}')">✏️ Редактировать</button>
-                                <button class="btn btn-small btn-danger" onclick="deletePavilion('${p.id}')">🗑️ Удалить</button>
-                            </div>
-                        </td>
-                    </tr>
-                `).join('');
-
-            } catch (error) {
-                console.error('❌ Admin: Ошибка при загрузке павильонов', error);
-            }
-        }
-
-        /**
-         * Редактирует павильон
-         */
-        function editPavilion(pavilionId) {
-            console.log('✏️ Admin: Редактирование павильона', pavilionId);
-            alert('Функция редактирования будет реализована');
-        }
-
-        /**
-         * Удаляет павильон
-         */
-        async function deletePavilion(pavilionId) {
-            if (!confirm('Вы уверены, что хотите удалить павильон?')) {
-                return;
-            }
-
-            try {
-                await window.Data?.deletePavilion?.(pavilionId);
-                alert('✅ Павильон удалён');
-                loadPavilions();
-                updateStats();
-            } catch (error) {
-                console.error('❌ Admin: Ошибка при удалении', error);
-                alert('❌ Ошибка при удалении павильона');
-            }
-        }
-
-        /**
-         * Обновляет статистику
-         */
-        async function updateStats() {
-            try {
-                const tenant = window.Auth?.getCurrentTenant?.();
-                if (!tenant) return;
-
-                const pavilions = await window.Data?.getAllPavilions?.();
-                const myPavilions = pavilions?.filter(p => p.tenant_id === tenant.id) || [];
-
-                const totalDiscounts = myPavilions.reduce((sum, p) => sum + (p.discounts?.length || 0), 0);
-
-                document.getElementById('stat-pavilions').textContent = myPavilions.length;
-                document.getElementById('stat-discounts').textContent = totalDiscounts;
-                document.getElementById('stat-views').textContent = '0'; // TODO: Реализовать подсчёт просмотров
-
-            } catch (error) {
-                console.error('❌ Admin: Ошибка при обновлении статистики', error);
+            if (window.Admin && typeof window.Admin.selectFloor === 'function') {
+                window.Admin.selectFloor(floor);
             }
         }
 
@@ -572,13 +317,6 @@
             const modal = document.getElementById('discount-modal');
             if (e.target === modal) {
                 hideAddDiscountModal();
-            }
-        });
-        
-        // Инициализация через Admin API, если скрипт подключён
-        document.addEventListener('DOMContentLoaded', function() {
-            if (window.Admin && typeof window.Admin.init === 'function') {
-                try { window.Admin.init(); } catch (e) { console.error('Admin.init() error', e); }
             }
         });
     </script>

@@ -68,6 +68,9 @@
         return;
       }
 
+      // Обновляем информацию пользователя в шапке
+      updateUserInfo();
+
       // Загружаем павильоны пользователя
       await loadUserPavilions();
 
@@ -80,6 +83,35 @@
       console.log('Admin: Инициализация завершена', currentUser);
     } catch (err) {
       handleError(err, 'Ошибка инициализации панели');
+    }
+  }
+
+  // Обновляет статистику
+  async function updateStatsUI() {
+    try {
+      if (!currentPavilions) currentPavilions = [];
+      
+      const totalDiscounts = currentPavilions.reduce((sum, p) => {
+        return sum + (Array.isArray(p.discounts) ? p.discounts.length : 0);
+      }, 0);
+
+      if (el('stat-pavilions')) el('stat-pavilions').textContent = currentPavilions.length;
+      if (el('stat-discounts')) el('stat-discounts').textContent = totalDiscounts;
+      if (el('stat-views')) el('stat-views').textContent = '0';
+    } catch (err) {
+      console.error('updateStatsUI error', err);
+    }
+  }
+
+  // Обновляет информацию пользователя в шапке
+  function updateUserInfo() {
+    try {
+      const userNameEl = document.getElementById('user-name');
+      if (userNameEl && currentUser) {
+        userNameEl.textContent = `👤 ${currentUser.name || currentUser.phone}`;
+      }
+    } catch (err) {
+      console.error('updateUserInfo error', err);
     }
   }
 
@@ -464,8 +496,8 @@
   // -----------------------------
   async function loadUserPavilions() {
     try {
-      if (!window.Data || !window.Data.getPavilionsByOwner) throw new Error('Data.getPavilionsByOwner не найден');
-      currentPavilions = await window.Data.getPavilionsByOwner(currentUser.id);
+      if (!window.Data || !window.Data.getPavilionsByTenant) throw new Error('Data.getPavilionsByTenant не найден');
+      currentPavilions = await window.Data.getPavilionsByTenant(currentUser.id);
       renderPavilionsList();
       renderPavilionsOnMiniMap();
     } catch (err) {
@@ -523,8 +555,8 @@
   // 9. Глобальный API экспорт
   // -----------------------------
   window.Admin = {
-    init: initAdmin,
-    loadPavilionForm,
+    init: initAdmin,    updateUserInfo,
+    updateStatsUI,    loadPavilionForm,
     savePavilion,
     createNewPavilion,
     handleImageUpload,

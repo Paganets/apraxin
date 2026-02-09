@@ -792,6 +792,33 @@ function generateId() {
   return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
+/**
+ * Получает текущего пользователя (из Auth модуля)
+ * 
+ * @returns {Promise<Object>} Объект текущего пользователя
+ */
+function getCurrentUser() {
+  return window.Auth?.getCurrentTenant?.() || null;
+}
+
+/**
+ * Alias для updatePavilion (совместимость с admin.js)
+ */
+const savePavilion = updatePavilion;
+
+/**
+ * Загружает изображение (заглушка - в реальном проекте интегрировать с Supabase Storage)
+ * 
+ * @param {File} file - Файл изображения
+ * @param {string} pavilionId - ID павильона
+ * @returns {Promise<string>} URL загруженного изображения
+ */
+async function uploadImage(file, pavilionId) {
+  console.log('📸 Data: uploadImage (заглушка для будущей интеграции)');
+  // TODO: Интегрировать с Supabase Storage
+  return null;
+}
+
 // ============================================================
 // ЭКСПОРТИРУЕМ ФУНКЦИИ ДЛЯ ГЛОБАЛЬНОГО ДОСТУПА
 // ============================================================
@@ -806,12 +833,14 @@ window.Data = {
   getPavilionById,
   createPavilion,
   updatePavilion,
+  savePavilion,  // Alias для совместимости с admin.js
   deletePavilion,
   
   // Арендаторы
   getAllTenants,
   getTenantByPhone,
   getTenantById,
+  getCurrentUser,  // Получить текущего пользователя
   
   // Скидки
   addDiscount,
@@ -822,6 +851,10 @@ window.Data = {
   searchPavilions,
   filterByCategory,
   getPavilionsByTenant,
+  
+  // Загрузка файлов
+  uploadImage,
+  uploadFile: uploadImage,  // Alias для совместимости
   
   // Кэширование
   getCacheData,
