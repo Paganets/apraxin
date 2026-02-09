@@ -13,10 +13,10 @@
     
     <!-- Инициализация конфигурации Supabase из <meta> тегов -->
     <script>
-      window.SupabaseConfig = {
-        url: document.querySelector('meta[name="supabase-url"]').content,
-        anonKey: document.querySelector('meta[name="supabase-anon-key"]').content
-      };
+            window.SupabaseConfig = {
+                url: document.querySelector('meta[name="supabase-url"]').content.trim(),
+                anonKey: document.querySelector('meta[name="supabase-anon-key"]').content.trim()
+            };
     </script>
     
     <!-- PWA Manifest -->

@@ -8,16 +8,16 @@
     <title>Супер-админка — Карта Апрашки</title>
     
     <!-- Supabase Configuration (передается через meta теги для безопасности) -->
-    <meta name="supabase-anon-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhZ3B1dWNkbmtyendzbW5ieW1rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MDMxMjYsImV4cCI6MjA4NjA3OTEyNn0.T3vFY9VfxIQ19AtWPkwk6xiqAZe6sEzG-Ke73olUPsY">
+    <meta name="supabase-anon-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhZ3B1dWNkbmtyendzbW5ieW1rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MDMxMjYsImV4cCI6MjA4NjA3OTEyNn0.T3vEY9VfxIQ19AtWPkwk6xiqAZe6sEzG-Ke73olUPsY">
     <meta name="supabase-url" content="https://qagpuucdnkrzwsmnbymk.supabase.co">
     
     <!-- Инициализация конфигурации Supabase из <meta> тегов -->
     <script>
       // Инициализация конфигурации Supabase из <meta> тегов
-      window.SupabaseConfig = {
-        url: document.querySelector('meta[name="supabase-url"]').content,
-        anonKey: document.querySelector('meta[name="supabase-anon-key"]').content
-      };
+            window.SupabaseConfig = {
+                url: document.querySelector('meta[name="supabase-url"]').content.trim(),
+                anonKey: document.querySelector('meta[name="supabase-anon-key"]').content.trim()
+            };
     </script>
     
     <!-- PWA Manifest -->

@@ -37,10 +37,6 @@
                     <span class="icon">🗺️</span>
                     <span>Карта</span>
                 </a>
-                <a href="admin.html" class="nav-link" title="Управление павильонами">
-                    <span class="icon">⚙️</span>
-                    <span>Админка</span>
-                </a>
                 <button id="auth-btn" class="auth-btn" title="Войти в аккаунт">
                     <span class="icon">👤</span>
                     <span>Вход</span>
@@ -82,10 +78,7 @@
                     </select>
                 </div>
 
-                <!-- Кнопка для владельцев павильонов -->
-                <a href="admin.html" class="btn-add-pavilion" title="Добавить свой павильон">
-                    ➕ Добавить павильон
-                </a>
+                <!-- Кнопка для владельцев павильонов (удалена из публичной версии) -->
             </div>
         </section>
 
@@ -252,6 +245,28 @@
             </aside>
         </div>
 
+        <!-- МОДАЛЬНОЕ ОКНО: ВХОД -->
+        <div id="login-modal" class="modal-overlay" style="display: none; align-items: center; justify-content: center;">
+            <div class="modal-content" style="max-width:420px; width:90%; padding:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <h3 style="margin:0;">🔐 Вход</h3>
+                    <button id="login-modal-close" class="modal-close" style="font-size:20px; background:none; border:none;">✕</button>
+                </div>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="phone-input">Номер телефона</label>
+                        <input type="tel" id="phone-input" name="phone" placeholder="+7 (9__) ___-__-__" required style="width:100%; padding:8px;">
+                    </div>
+                    <div id="auth-error" style="color:#b00020; display:none; margin-bottom:8px;"></div>
+                    <div id="auth-success" style="color:#008000; display:none; margin-bottom:8px;"></div>
+                    <div style="display:flex; gap:8px;">
+                        <button type="submit" class="btn btn-primary" style="flex:1;">Войти</button>
+                        <button type="button" class="btn btn-secondary" style="flex:1;" id="login-cancel">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- СТАТИСТИКА -->
         <section class="stats-section" aria-label="Статистика">
             <div class="stats-grid">
@@ -291,17 +306,9 @@
                     <a href="tel:+79001234567">+7 (900) 123-45-67</a>
                 </p>
             </div>
-            <div class="footer-section">
-                <h3>Для владельцев</h3>
-                <p>
-                    <a href="admin.html">Управление павильоном</a><br>
-                    <a href="#privacy">Политика конфиденциальности</a>
-                </p>
-            </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 Карта Апрашки. Все права защищены.</p>
-            <p class="version">v1.0.0</p>
+            <p>© 2026 Карта Апрашки</p>
         </div>
     </footer>
 
@@ -312,8 +319,8 @@
     <script>
         // Получаем ключ из <meta> тега для безопасности
         // Ключи передаются через HTML, а не хранятся в JS файлах
-        const supabaseAnonKey = document.querySelector('meta[name="supabase-anon-key"]').content;
-        const supabaseUrl = document.querySelector('meta[name="supabase-url"]').content;
+        const supabaseAnonKey = document.querySelector('meta[name="supabase-anon-key"]').content.trim();
+        const supabaseUrl = document.querySelector('meta[name="supabase-url"]').content.trim();
 
         // Создаём глобальный объект конфигурации
         window.SupabaseConfig = {
@@ -332,5 +339,37 @@
     <script src="js/auth.js"></script>
     <script src="js/data.js"></script>
     <script src="js/map.js"></script>
+
+    <script>
+        // Управление модальным окном входа (открытие по #login и локальные кнопки)
+        (function(){
+            function showLoginModal(){
+                const m = document.getElementById('login-modal');
+                if(!m) return;
+                m.style.display = 'flex';
+            }
+            function hideLoginModal(){
+                const m = document.getElementById('login-modal');
+                if(!m) return;
+                m.style.display = 'none';
+                try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch(e){}
+            }
+
+            document.addEventListener('DOMContentLoaded', ()=>{
+                if(window.location.hash === '#login') showLoginModal();
+
+                window.addEventListener('hashchange', ()=>{
+                    if(window.location.hash === '#login') showLoginModal(); else hideLoginModal();
+                });
+
+                const close = document.getElementById('login-modal-close');
+                if(close) close.addEventListener('click', hideLoginModal);
+                const cancel = document.getElementById('login-cancel');
+                if(cancel) cancel.addEventListener('click', hideLoginModal);
+
+                // если auth.js перенаправляет к #login (handleAuthButtonClick), форма откроется автоматически
+            });
+        })();
+    </script>
 </body>
 </html>
