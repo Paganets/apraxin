@@ -19,7 +19,7 @@
   const FLOOR_PLANS_CONFIG = {
     '33': {
       1: {
-        image: '/images/floor-plans/building_33_floor_1.png',
+        image: 'images/floor-plans/building_33_floor_1.png',
         // Примеры координат павильонов (в процентах от ширины/высоты изображения)
         // Эти данные используются для подсвечивания и поиска павильонов
         pavilionsApprox: {
@@ -29,26 +29,26 @@
         }
       },
       2: {
-        image: '/images/floor-plans/building_33_floor_2.png',
+        image: 'images/floor-plans/building_33_floor_2.png',
         pavilionsApprox: {}
       },
       3: {
-        image: '/images/floor-plans/building_33_floor_3.png',
+        image: 'images/floor-plans/building_33_floor_3.png',
         pavilionsApprox: {}
       },
       4: {
-        image: '/images/floor-plans/building_33_floor_4.png',
+        image: 'images/floor-plans/building_33_floor_4.png',
         pavilionsApprox: {}
       },
       5: {
-        image: '/images/floor-plans/building_33_floor_5.png',
+        image: 'images/floor-plans/building_33_floor_5.png',
         pavilionsApprox: {}
       }
     },
     // Для других корпусов (A, B, C, D) можно добавить аналогично
     'A': {
-      1: { image: '/images/floor-plans/building_a_floor_1.png', pavilionsApprox: {} },
-      2: { image: '/images/floor-plans/building_a_floor_2.png', pavilionsApprox: {} }
+      1: { image: 'images/floor-plans/building_a_floor_1.png', pavilionsApprox: {} },
+      2: { image: 'images/floor-plans/building_a_floor_2.png', pavilionsApprox: {} }
     }
     // и т.д.
   };

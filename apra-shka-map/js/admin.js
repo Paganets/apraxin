@@ -644,10 +644,15 @@
     initMiniMap,
     setCoordinates,
     selectFloor,
+    selectBuilding,
     renderPavilionsList,
     editPavilion,
     deletePavilion
   };
+  
+  // Экспортируем функции в глобальную область для вызова из HTML
+  window.selectFloor = selectFloor;
+  window.selectBuilding = selectBuilding;
 
   // Автоинициализация, если админская страница загружена
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
