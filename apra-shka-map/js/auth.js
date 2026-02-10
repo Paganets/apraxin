@@ -341,7 +341,7 @@ async function handleLoginFormSubmit(event) {
     // Перенаправляем в админ-панель или главную страницу
     console.log('🚀 Переходу в админ-панель');
     setTimeout(() => {
-      window.location.href = 'admin.html';
+      window.location.href = './admin.html';
     }, 500);
     
   } catch (error) {
@@ -449,7 +449,7 @@ function logout() {
   
   // Перенаправляем на главную страницу
   console.log('✅ Auth: Выход выполнен успешно');
-  window.location.href = 'index.html';
+  window.location.href = './index.html';
 }
 
 // ============================================================
@@ -465,7 +465,7 @@ function logout() {
  * @returns {boolean} true если авторизован
  */
 function requireAuth(options = {}) {
-  const { redirectTo = 'index.html' } = options;
+  const { redirectTo = './index.html' } = options;
   
   if (!isAuthenticated()) {
     console.warn('🔒 Auth: Доступ запрещён - требуется авторизация');
@@ -526,7 +526,7 @@ function showUserMenu() {
       <div class="user-phone">${tenant.phone}</div>
     </div>
     <hr>
-    <a href="admin.html" class="menu-item">📊 Админ-панель</a>
+    <a href="./admin.html" class="menu-item">📊 Админ-панель</a>
     <button onclick="logout()" class="menu-item danger">🚪 Выход</button>
   `;
   

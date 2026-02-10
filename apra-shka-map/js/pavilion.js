@@ -348,7 +348,7 @@
   // -----------------------------
   function showOnMap() {
     if (!currentPavilion) return;
-    window.location.href = `/?pavilion=${currentPavilion.id}`;
+    window.location.href = `./index.html?pavilion=${currentPavilion.id}`;
   }
 
   function sharePavilion() {
