@@ -105,6 +105,7 @@ function applyFiltersAndRender() {
   
   // Отрисовка карты
   renderMapSVG();
+  renderPavilionsList();
 }
 
 /**
@@ -165,6 +166,52 @@ function updateMapStats() {
   if (statsElement) {
     statsElement.textContent = `${visibleCount}`;
   }
+}
+
+/**
+ * Отрисовывает список павильонов для фильтров
+ */
+function renderPavilionsList() {
+  const listEl = document.getElementById('pavilions-list');
+  const countEl = document.getElementById('pavilions-list-count');
+  const emptyEl = document.getElementById('pavilions-list-empty');
+
+  if (!listEl) return;
+
+  const items = MapState.filteredPavilions || [];
+  listEl.innerHTML = '';
+
+  if (countEl) countEl.textContent = `${items.length}`;
+
+  if (emptyEl) {
+    emptyEl.style.display = items.length === 0 ? 'block' : 'none';
+  }
+
+  items.forEach(pavilion => {
+    const li = document.createElement('li');
+    li.className = 'pavilions-list-item';
+    li.setAttribute('data-pavilion-id', pavilion.id);
+
+    const title = pavilion.name || pavilion.shop_name || 'Павильон';
+    const number = pavilion.pavilion_number || pavilion.location || '';
+    const building = pavilion.building ? `Корпус ${pavilion.building}` : '';
+    const floor = pavilion.floor ? `этаж ${pavilion.floor}` : '';
+    const metaParts = [building, floor, number ? `№ ${number}` : ''].filter(Boolean);
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'pavilions-list-item-title';
+    titleEl.textContent = title;
+
+    const metaEl = document.createElement('div');
+    metaEl.className = 'pavilions-list-item-meta';
+    metaEl.textContent = metaParts.join(' • ');
+
+    li.appendChild(titleEl);
+    li.appendChild(metaEl);
+
+    li.addEventListener('click', () => selectPavilion(pavilion));
+    listEl.appendChild(li);
+  });
 }
 
 // ============================================================

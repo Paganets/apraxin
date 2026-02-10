@@ -261,6 +261,14 @@
     showMessage('Готово: создайте новый павильон', 'info');
   }
 
+  // Переключает видимость блока "Корпус → Этаж → Павильон"
+  function togglePavilionEditor() {
+    const editor = el('pavilion-editor');
+    if (!editor) return;
+    const isHidden = editor.style.display === 'none' || editor.style.display === '';
+    editor.style.display = isHidden ? 'block' : 'none';
+  }
+
   // -----------------------------
   // 3. Загрузка изображений
   // -----------------------------
@@ -571,6 +579,7 @@
     try {
       if (!window.Data || !window.Data.getPavilionsByTenant) throw new Error('Data.getPavilionsByTenant не найден');
       currentPavilions = await window.Data.getPavilionsByTenant(currentUser.id);
+      updateStatsUI();
       renderPavilionsList();
       renderPavilionsOnMiniMap();
     } catch (err) {
@@ -632,6 +641,7 @@
     updateStatsUI,    loadPavilionForm,
     savePavilion,
     createNewPavilion,
+    togglePavilionEditor,
     handleImageUpload,
     addDiscount,
     editDiscount,
@@ -650,6 +660,7 @@
   // Экспортируем функции в глобальную область для вызова из HTML
   window.selectFloor = selectFloor;
   window.selectBuilding = selectBuilding;
+  window.togglePavilionEditor = togglePavilionEditor;
 
   // Автоинициализация, если админская страница загружена
   if (document.readyState === 'complete' || document.readyState === 'interactive') {

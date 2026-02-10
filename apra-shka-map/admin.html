@@ -49,7 +49,7 @@
     <main class="app-main">
         <!-- СТАТИСТИКА -->
         <section class="stats-grid">
-            <div class="stat-card">
+            <div class="stat-card" id="stat-pavilions-card" onclick="togglePavilionEditor()" style="cursor: pointer;">
                 <div class="stat-number" id="stat-pavilions">0</div>
                 <div class="stat-label">Павильонов в корпусах</div>
             </div>
@@ -62,7 +62,7 @@
         <!-- ОСНОВНАЯ РАЗМЕТКА: ДВЕ КОЛОНКИ -->
         <div class="admin-container">
             <!-- ЛЕВАЯ КОЛОНКА: ФОРМА РЕДАКТИРОВАНИЯ -->
-            <div class="edit-panel">
+            <div class="edit-panel" id="pavilion-editor" style="display: none;">
                 <h2 class="admin-section-title">Корпус → Этаж → Павильон</h2>
 
                 <form id="pavilion-form">
@@ -193,7 +193,7 @@
             </div>
 
             <!-- ПРАВАЯ КОЛОНКА: ПРЕДПРОМОТР КАРТЫ -->
-            <div class="preview-panel">
+            <div class="preview-panel" style="display: none;">
                 <h2 class="admin-section-title">Карта</h2>
 
                 <!-- ВЫБОР ЭТАЖА -->

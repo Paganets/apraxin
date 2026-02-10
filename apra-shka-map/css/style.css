@@ -505,6 +505,13 @@ pre {
    8. КАРТА И ЕЁ КОНТЕЙНЕР
    ============================================================ */
 
+.section-title {
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
 .map-wrapper {
   display: grid;
   grid-template-columns: 1fr 0;
@@ -557,6 +564,82 @@ pre {
   stroke-width: 2;
   opacity: 0.95;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+}
+
+/* ============================================================
+   8.1 СПИСОК ПАВИЛЬОНОВ (ДЛЯ ФИЛЬТРОВ)
+   ============================================================ */
+
+.pavilions-list {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background: var(--color-bg-light);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.pavilions-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.pavilions-list-header h3 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+}
+
+.pavilions-list-count {
+  background: var(--color-accent);
+  color: var(--color-white);
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+}
+
+.pavilions-list-empty {
+  color: var(--color-text-light);
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-sm) 0;
+}
+
+.pavilions-list-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.pavilions-list-item {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+  background: var(--color-secondary);
+  cursor: pointer;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.pavilions-list-item:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.pavilions-list-item-title {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+
+.pavilions-list-item-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-light);
 }
 
 .pavilion-clothing { fill: var(--color-category-clothing); }
