@@ -18,6 +18,14 @@
   z-index: var(--z-header);
 }
 
+.admin-header .btn {
+  min-width: 80px;
+}
+
+.admin-header .btn-primary {
+  min-width: 80px;
+}
+
 .admin-header-title {
   display: flex;
   align-items: center;
@@ -625,7 +633,25 @@
   }
 
   .admin-header-user {
-    width: 100%;
+    position: fixed;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    z-index: 1001;
+    background: transparent;
+  }
+  
+  .admin-header-user #user-name {
+    display: none;
+  }
+  
+  .admin-header-user .back-btn {
+    display: none;
+  }
+  
+  .admin-header-user .btn {
+    width: 30vw;
+    min-width: 80px;
+    max-width: 150px;
   }
 
   .admin-container {
@@ -682,9 +708,26 @@
   }
 
   .admin-header-user {
-    flex-direction: column;
-    align-items: flex-start;
-    font-size: var(--font-size-xs);
+    position: fixed;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    z-index: 1001;
+  }
+  
+  .admin-header-user #user-name {
+    display: none;
+  }
+  
+  .admin-header-user .back-btn {
+    display: none;
+  }
+  
+  .admin-header-user .btn {
+    width: 30vw;
+    min-width: 70px;
+    max-width: 120px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
   }
 
   .category-chips {
