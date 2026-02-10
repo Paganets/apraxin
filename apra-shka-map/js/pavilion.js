@@ -415,8 +415,6 @@
       const contacts = el('contacts-section'); if (contacts) contacts.style.display = isPremium ? 'block' : 'none';
       // additional categories
       const addCats = el('additional-categories'); if (addCats) addCats.style.display = isPremium ? 'block' : 'none';
-      // stats
-      const stats = el('stats-section'); if (stats) stats.style.display = isPremium ? 'block' : 'none';
     } catch (err) { warn('togglePremiumFeatures', err); }
   }
 

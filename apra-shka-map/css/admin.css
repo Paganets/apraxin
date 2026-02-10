@@ -119,9 +119,10 @@
 /* ПАЛИТРА ЦВЕТОВ */
 .color-palette {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: var(--spacing-sm);
   margin-top: var(--spacing-sm);
+  max-width: 100%;
 }
 
 .color-option {
@@ -591,7 +592,7 @@
   }
 
   .color-palette {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
   }
 
   .stats-grid {
@@ -632,7 +633,7 @@
   }
 
   .color-palette {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .pavilions-table {

@@ -10,7 +10,8 @@
 :root {
   /* ЦВЕТА - Основная палитра */
   --color-primary: #000000;
-  --color-secondary: #ffffff;
+  --color-secondary: #1A1A1A;
+  --color-white: #ffffff;
   --color-accent: #FF6B35;
   --color-accent-dark: #FF5722;
   --color-accent-light: #FFB399;
@@ -32,22 +33,23 @@
   --color-category-sports: #4CAF50;
   --color-category-other: #9E9E9E;
   
-  /* ЦВЕТА - Neutrals */
-  --color-text: #333333;
-  --color-text-light: #666666;
+  /* ЦВЕТА - Neutrals (темная тема по умолчанию) */
+  --color-text: #EEEEEE;
+  --color-text-light: #CCCCCC;
   --color-text-lighter: #999999;
-  --color-bg-light: #F5F5F5;
-  --color-bg-lighter: #FAFAFA;
-  --color-border: #DDDDDD;
-  --color-border-light: #EEEEEE;
+  --color-secondary: #1A1A1A;
+  --color-bg-light: #2A2A2A;
+  --color-bg-lighter: #3A3A3A;
+  --color-border: #444444;
+  --color-border-light: #555555;
   --color-disabled: #BDBDBD;
   
   /* ТЕНИ */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 3px 12px rgba(0, 0, 0, 0.12);
-  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
-  --shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 3px 12px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.4);
   
   /* ПЕРЕХОДЫ И АНИМАЦИИ */
   --transition-fast: 150ms ease-out;
@@ -103,24 +105,26 @@
 }
 
 /* ============================================================
-   2. CSS ПЕРЕМЕННЫЕ - ТЁМНАЯ ТЕМА
+   2. CSS ПЕРЕМЕННЫЕ - СВЕТЛАЯ ТЕМА (опционально)
    ============================================================ */
 
-@media (prefers-color-scheme: dark) {
+/* Раскомментируйте, если нужна светлая тема:
+@media (prefers-color-scheme: light) {
   :root {
-    --color-text: #EEEEEE;
-    --color-text-light: #CCCCCC;
+    --color-text: #333333;
+    --color-text-light: #666666;
     --color-text-lighter: #999999;
-    --color-secondary: #1A1A1A;
-    --color-bg-light: #2A2A2A;
-    --color-bg-lighter: #3A3A3A;
-    --color-border: #444444;
-    --color-border-light: #555555;
-    --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 3px 12px rgba(0, 0, 0, 0.35);
-    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --color-secondary: #ffffff;
+    --color-bg-light: #F5F5F5;
+    --color-bg-lighter: #FAFAFA;
+    --color-border: #DDDDDD;
+    --color-border-light: #EEEEEE;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 3px 12px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
   }
 }
+*/
 
 /* ============================================================
    3. СБРОС СТИЛЕЙ И БАЗОВЫЕ ЭЛЕМЕНТЫ
@@ -157,7 +161,7 @@ body {
   font-weight: var(--font-weight-normal);
   line-height: var(--line-height-normal);
   background-color: var(--color-secondary);
-  color: var(--text-color);
+  color: var(--color-text);
   transition: background-color var(--transition-base), color var(--transition-base);
 }
 
@@ -232,7 +236,7 @@ pre {
 
 .app-header {
   background-color: var(--color-primary);
-  color: var(--color-secondary);
+  color: var(--color-white);
   padding: var(--spacing-md);
   box-shadow: var(--shadow-lg);
   position: sticky;
@@ -255,14 +259,14 @@ pre {
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
   margin-bottom: 0.2rem;
-  color: var(--color-secondary);
+  color: var(--color-white);
 }
 
 .app-subtitle {
   font-size: var(--font-size-sm);
   opacity: 0.8;
   margin: 0;
-  color: var(--color-secondary);
+  color: var(--color-white);
 }
 
 .header-nav {
@@ -272,7 +276,7 @@ pre {
 }
 
 .nav-link {
-  color: var(--color-secondary);
+  color: var(--color-white);
   text-decoration: none;
   padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--radius-md);
@@ -304,7 +308,7 @@ pre {
 .auth-btn {
   padding: var(--spacing-sm) var(--spacing-md);
   background-color: var(--color-accent);
-  color: var(--color-secondary);
+  color: var(--color-white);
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
@@ -789,7 +793,7 @@ pre {
 .btn-share {
   width: 100%;
   background-color: var(--color-accent);
-  color: var(--color-secondary);
+  color: var(--color-white);
 }
 
 .btn-share:hover {
@@ -800,7 +804,7 @@ pre {
 
 .btn-primary {
   background-color: var(--color-primary);
-  color: var(--color-secondary);
+  color: var(--color-white);
 }
 
 .btn-primary:hover {
@@ -810,19 +814,19 @@ pre {
 }
 
 .btn-secondary {
-  background-color: var(--color-bg-light);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
+  background-color: #2a2a2a;
+  color: #cccccc;
+  border: 1px solid #3a3a3a;
 }
 
 .btn-secondary:hover {
-  background-color: var(--color-border-light);
+  background-color: #3a3a3a;
   transform: translateY(-2px);
 }
 
 .btn-danger {
   background-color: var(--color-danger);
-  color: var(--color-secondary);
+  color: var(--color-white);
 }
 
 .btn-danger:hover {
@@ -833,7 +837,7 @@ pre {
 
 .btn:disabled {
   background-color: var(--color-disabled);
-  color: var(--color-secondary);
+  color: var(--color-white);
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -952,7 +956,7 @@ form {
 
 .app-footer {
   background-color: var(--color-primary);
-  color: var(--color-secondary);
+  color: var(--color-white);
   padding: var(--spacing-xl) var(--spacing-md) var(--spacing-md);
   margin-top: var(--spacing-xl);
   border-top: 2px solid var(--color-border);
@@ -982,7 +986,7 @@ form {
 }
 
 .footer-section a {
-  color: var(--color-secondary);
+  color: var(--color-white);
   text-decoration: none;
   transition: color var(--transition-fast);
 }
