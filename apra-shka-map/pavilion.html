@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Детальная информация о павильоне в Апраксином дворе">
+    <meta name="description" content="Детальная информация о павильоне в корпусе Апраксиного двора">
     <meta name="theme-color" content="#000000">
-    <title>Павильон — Карта Апрашки</title>
+    <title>Павильон (Корпус → Этаж) — Карта Апрашки</title>
     
     <!-- Supabase Configuration (передается через meta теги для безопасности) -->
     <meta name="supabase-anon-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhZ3B1dWNkbmtyendzbW5ieW1rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MDMxMjYsImV4cCI6MjA4NjA3OTEyNn0.T3vEY9VfxIQ19AtWPkwk6xiqAZe6sEzG-Ke73olUPsY">
@@ -29,7 +29,7 @@
     <link rel="stylesheet" href="css/style.css">
     <style>
         /* ============================================================
-           СТРАНИЦА ПАВИЛЬОНА - СПЕЦИФИЧНЫЕ СТИЛИ
+           СТРАНИЦА ПАВИЛЬОНА (КОРПУС → ЭТАЖ → НОМЕР) - СПЕЦИФИЧНЫЕ СТИЛИ
            ============================================================ */
 
         /* РЕКЛАМНЫЙ БАННЕР */
@@ -103,7 +103,7 @@
           box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
         }
 
-        /* ШАПКА ПАВИЛЬОНА */
+        /* ШАПКА ПАВИЛЬОНА (КОРПУС, ЭТАЖ, НОМЕР) */
         .pavilion-header {
           background: var(--color-primary);
           color: var(--color-secondary);
@@ -590,17 +590,16 @@
     <div id="app">
         <!-- РЕКЛАМНЫЙ БАННЕР -->
         <div class="ad-banner" id="ad-banner" style="display: none;">
-            <button class="ad-close" onclick="closeAdBanner()">✕</button>
-            <div id="ad-container" style="width: 100%; height: 100%;"></div>
+            <button class="ad-close" onclick="closeAdBanner()">Закрыть</button>
         </div>
 
         <!-- ШАПКА СТРАНИЦЫ -->
         <header class="pavilion-header" id="pavilion-header">
-            <div class="pavilion-hero placeholder" id="pavilion-hero">🏪</div>
+            <div class="pavilion-hero placeholder" id="pavilion-hero"></div>
             <div class="pavilion-info">
                 <div style="display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-md);">
                     <h1 class="pavilion-title" id="pavilion-name">Загрузка...</h1>
-                    <span class="premium-badge" id="premium-badge" style="display: none;">⭐ Премиум</span>
+                    <span class="premium-badge" id="premium-badge" style="display: none;">Премиум</span>
                 </div>
                 
                 <div class="pavilion-meta">
@@ -608,10 +607,10 @@
                         <span id="pavilion-category">—</span>
                     </div>
                     <div class="pavilion-meta-item">
-                        📍 <span id="pavilion-location">—</span>
+                        <span id="pavilion-location">—</span>
                     </div>
                     <div class="pavilion-meta-item">
-                        🏢 <span id="pavilion-floor">—</span>
+                        <span id="pavilion-floor">—</span>
                     </div>
                 </div>
 
@@ -627,34 +626,34 @@
         <!-- КНОПКИ ДЕЙСТВИЙ -->
         <div class="actions-grid">
             <button class="action-btn" onclick="showOnMap()" title="Показать на карте">
-                <span class="action-icon">🗺️</span>
+                <span class="action-icon"></span>
                 <span class="action-label">На карте</span>
             </button>
             <button class="action-btn" onclick="sharePavilion()" title="Поделиться">
-                <span class="action-icon">🔗</span>
+                <span class="action-icon"></span>
                 <span class="action-label">Поделиться</span>
             </button>
             <button class="action-btn" onclick="getRoute()" title="Как добраться">
-                <span class="action-icon">🚶</span>
+                <span class="action-icon"></span>
                 <span class="action-label">Как добраться</span>
             </button>
             <a class="action-btn" id="call-btn" href="tel:" title="Позвонить" style="display: none;">
-                <span class="action-icon">☎️</span>
+                <span class="action-icon"></span>
                 <span class="action-label">Позвонить</span>
             </a>
             <a class="action-btn" id="message-btn" href="#" title="Написать сообщение" style="display: none;">
-                <span class="action-icon">💬</span>
+                <span class="action-icon"></span>
                 <span class="action-label">Написать</span>
             </a>
         </div>
 
         <!-- РАЗДЕЛ СКИДОК (только для премиум) -->
         <section class="section premium-only" id="discounts-section" style="display: none;">
-            <h2 class="section-title">✨ Скидки и предложения</h2>
+            <h2 class="section-title">Скидки и предложения</h2>
             <div class="discounts-container" id="discounts-container">
                 <div class="discounts-list" id="discounts-list">
                 <div class="empty-state">
-                    <div class="empty-state-icon">📦</div>
+                    <div class="empty-state-icon"></div>
                     <p>Скидок нет</p>
                 </div>
                 </div>
@@ -663,7 +662,7 @@
 
         <!-- РАЗДЕЛ КАТЕГОРИЙ -->
         <section class="section" id="categories-container">
-            <h2 class="section-title">📂 Категория товаров</h2>
+            <h2 class="section-title">Категория товаров</h2>
             <p style="font-size: var(--font-size-base); color: var(--color-text); margin: 0;">
                 <span class="pavilion-category" id="pavilion-category-large">—</span>
             </p>
@@ -677,14 +676,14 @@
 
         <!-- РАЗДЕЛ КОНТАКТОВ (только для премиум) -->
         <section class="section premium-only" id="contacts-section" style="display: none;">
-            <h2 class="section-title">📞 Контакты</h2>
+            <h2 class="section-title">Контакты</h2>
             <div class="contacts-container" id="contacts-container">
                 <div class="contacts-grid">
                 <a class="contact-btn" id="contact-message" href="#">
-                    💬 Написать владельцу
+                    Написать владельцу
                 </a>
                 <a class="contact-btn" id="contact-call" href="tel:">
-                    ☎️ Позвонить
+                    Позвонить
                 </a>
                 </div>
             </div>
@@ -692,7 +691,7 @@
 
         <!-- СТАТИСТИКА ПРОСМОТРОВ (премиум) -->
         <section class="section premium-only" id="stats-section" style="display: none;">
-            <h2 class="section-title">📊 Статистика</h2>
+            <h2 class="section-title">Статистика</h2>
             <div class="stats-container">
                 <div class="stat-item">
                     <div class="stat-number" id="stat-views">0</div>
@@ -711,8 +710,8 @@
 
         <!-- ФУТЕР -->
         <footer class="pavilion-footer">
-            <div class="pavilion-footer-brand">🏪 Карта Апрашки</div>
-            <a href="/" class="pavilion-footer-link">← Вернуться на главную</a>
+            <div class="pavilion-footer-brand">Карта Апрашки</div>
+            <a href="/" class="pavilion-footer-link">Вернуться на главную</a>
         </footer>
     </div>
 

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="description" content="Интерактивная карта Апраксина двора в Санкт-Петербурге. Найдите все павильоны, скидки и предложения.">
-    <meta name="keywords" content="Апрашка, Апраксин двор, карта, павильоны, магазины, Санкт-Петербург">
+    <meta name="description" content="Интерактивная карта Апраксина двора в Санкт-Петербурге. Найдите павильоны по корпусам и этажам, скидки и предложения.">
+    <meta name="keywords" content="Апрашка, Апраксин двор, карта, павильоны, корпуса, этажи, магазины, Санкт-Петербург">
     <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -34,11 +34,11 @@
             </div>
             <nav class="header-nav">
                 <a href="index.html" class="nav-link active" title="Интерактивная карта">
-                    <span class="icon">🗺️</span>
+                    <span class="icon"></span>
                     <span>Карта</span>
                 </a>
                 <button id="auth-btn" class="auth-btn" title="Войти в аккаунт">
-                    <span class="icon">👤</span>
+                    <span class="icon"></span>
                     <span>Вход</span>
                 </button>
             </nav>
@@ -58,27 +58,27 @@
                         type="text" 
                         id="search-input" 
                         class="search-input" 
-                        placeholder="🔍 Поиск по названию магазина..."
-                        aria-label="Поиск павильонов">
-                    <button class="search-clear" id="search-clear" aria-label="Очистить поиск" style="display: none;">✕</button>
+                        placeholder="Поиск по названию магазина..."
+                        aria-label="Поиск павильонов по корпусам и этажам">
+                    <button class="search-clear" id="search-clear" aria-label="Очистить поиск" style="display: none;">X</button>
                 </div>
 
                 <!-- Фильтр по категориям -->
                 <div class="filter-group">
                     <select id="category-filter" class="category-filter" aria-label="Фильтр по категориям">
                         <option value="">Все категории</option>
-                        <option value="одежда">👕 Одежда</option>
-                        <option value="обувь">👞 Обувь</option>
-                        <option value="аксессуары">💍 Аксессуары</option>
-                        <option value="электроника">📱 Электроника</option>
-                        <option value="косметика">💄 Косметика</option>
-                        <option value="спорт">⚽ Спорт</option>
-                        <option value="буквы">📚 Буквы и наклейки</option>
-                        <option value="другое">🛍️ Другое</option>
+                        <option value="одежда">Одежда</option>
+                        <option value="обувь">Обувь</option>
+                        <option value="аксессуары">Аксессуары</option>
+                        <option value="электроника">Электроника</option>
+                        <option value="косметика">Косметика</option>
+                        <option value="спорт">Спорт</option>
+                        <option value="буквы">Буквы и наклейки</option>
+                        <option value="другое">Другое</option>
                     </select>
                 </div>
 
-                <!-- Кнопка для владельцев павильонов (удалена из публичной версии) -->
+                <!-- Кнопка для владельцев павильонов (в корпусах) -->
             </div>
         </section>
 
@@ -126,7 +126,7 @@
                     <circle cx="900" cy="100" r="40" fill="#87CEEB" stroke="#333" stroke-width="2"/>
                     <text x="900" y="105" font-size="12" font-weight="bold" text-anchor="middle" fill="#333">🚻 WC</text>
 
-                    <!-- Плейсхолдеры для павильонов (сетка) -->
+                    <!-- Плейсхолдеры для павильонов (сетка по корпусам и этажам) -->
                     <!-- Левая часть -->
                     <g id="pavilions-left">
                         <rect x="20" y="160" width="80" height="60" fill="#fff" stroke="#999" stroke-width="1" class="pavilion-slot" data-slot="a1" rx="3"/>
@@ -196,22 +196,22 @@
 
                 <!-- Сообщение о загрузке -->
                 <div id="loading-message" class="loading-message" style="display: none;">
-                    ⏳ Загрузка павильонов...
+                    Загрузка павильонов из корпусов...
                 </div>
 
                 <!-- Сообщение об ошибке -->
                 <div id="error-message" class="error-message" style="display: none;">
-                    ⚠️ Не удалось загрузить карту. Проверьте соединение.
+                    Не удалось загрузить карту. Проверьте соединение.
                 </div>
             </div>
 
-            <!-- БОКОВАЯ ПАНЕЛЬ - Информация о выбранном павильоне -->
+            <!-- БОКОВАЯ ПАНЕЛЬ - Информация о выбранном павильоне (корпус, этаж, номер) -->
             <aside id="pavilion-info" class="pavilion-info hidden" role="complementary">
                 <button class="close-btn" id="close-pavilion" aria-label="Закрыть информацию">&times;</button>
                 
                 <div class="pavilion-content">
                     <header class="pavilion-header">
-                        <h2 id="pavilion-name">Выберите павильон</h2>
+                        <h2 id="pavilion-name">Выберите павильон в корпусе</h2>
                         <p id="pavilion-number" class="pavilion-number">—</p>
                     </header>
 
@@ -231,14 +231,14 @@
                         <div class="detail-block">
                             <h3>О проекте</h3>
                             <p class="help-text">
-                                Выбирайте павильоны на карте слева, чтобы узнать больше информации и скидки.
+                                Выбирайте павильоны на карте слева (по корпусам и этажам), чтобы узнать больше информации и скидки.
                             </p>
                         </div>
                     </section>
 
                     <footer class="pavilion-footer">
                         <button class="btn btn-share" id="share-btn" style="display: none;">
-                            📤 Поделиться
+                            Поделиться
                         </button>
                     </footer>
                 </div>
@@ -249,13 +249,26 @@
         <div id="login-modal" class="modal-overlay" style="display: none; align-items: center; justify-content: center;">
             <div class="modal-content" style="max-width:420px; width:90%; padding:20px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                    <h3 style="margin:0;">🔐 Вход</h3>
-                    <button id="login-modal-close" class="modal-close" style="font-size:20px; background:none; border:none;">✕</button>
+                    <h3 style="margin:0;">Вход</h3>
+                    <button id="login-modal-close" class="modal-close" style="font-size:20px; background:none; border:none;">X</button>
                 </div>
                 <form id="login-form">
                     <div class="form-group">
                         <label for="phone-input">Номер телефона</label>
-                        <input type="tel" id="phone-input" name="phone" placeholder="+7 (9__) ___-__-__" required style="width:100%; padding:8px;">
+                        <div class="phone-input-wrapper" style="display:flex; gap:8px; align-items:center;">
+                            <span id="phone-prefix" aria-hidden="true" style="padding:8px 10px; background:#f5f5f5; border:1px solid #d0d0d0; border-radius:4px;">+7</span>
+                            <input
+                                type="tel"
+                                id="phone-input"
+                                name="phone"
+                                placeholder="9__ ___ __ __"
+                                inputmode="numeric"
+                                pattern="[0-9]*"
+                                maxlength="10"
+                                required
+                                style="flex:1; padding:8px;"
+                                aria-label="Номер телефона без кода страны">
+                        </div>
                     </div>
                     <div id="auth-error" style="color:#b00020; display:none; margin-bottom:8px;"></div>
                     <div id="auth-success" style="color:#008000; display:none; margin-bottom:8px;"></div>
@@ -272,7 +285,7 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-number" id="total-pavilions">0</div>
-                    <div class="stat-label">Павильонов</div>
+                    <div class="stat-label">Павильонов в корпусах</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number" id="categories-count">0</div>
@@ -295,7 +308,7 @@
                 <h3>О проекте</h3>
                 <p>
                     Интерактивная карта Апраксина двора в Санкт-Петербурге. 
-                    Находите павильоны, смотрите скидки и предложения.
+                    Находите павильоны по корпусам и этажам, смотрите скидки и предложения.
                 </p>
             </div>
             <div class="footer-section">
@@ -360,7 +373,7 @@
                 }
             }
             function hideLoginModal(){
-                console.log('🚪 Закрываю модальное окно входа');
+                console.log('Закрываю модальное окно входа');
                 const m = document.getElementById('login-modal');
                 if(!m) return;
                 m.style.display = 'none';

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Админ-панель Апрашки — Управление павильонами и скидками">
+    <meta name="description" content="Админ-панель Апрашки — Управление корпусами, этажами и павильонами">
     <meta name="theme-color" content="#000000">
     <title>Админ-панель — Карта Апрашки</title>
     
@@ -32,11 +32,11 @@
     <!-- ШАПКА АДМИН-ПАНЕЛИ -->
     <header class="admin-header">
         <div class="admin-header-title">
-            <h1>🏢 Админ-панель</h1>
+            <h1>Админ-панель</h1>
         </div>
         <div class="admin-header-user" id="user-info">
             <span id="user-name">Загрузка...</span>
-            <button class="btn btn-primary" onclick="handleLogout()">🚪 Выход</button>
+            <button class="btn btn-primary" onclick="handleLogout()">Выход</button>
         </div>
     </header>
 
@@ -46,7 +46,7 @@
         <section class="stats-grid">
             <div class="stat-card">
                 <div class="stat-number" id="stat-pavilions">0</div>
-                <div class="stat-label">Павильонов</div>
+                <div class="stat-label">Павильонов в корпусах</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="stat-discounts">0</div>
@@ -62,7 +62,7 @@
         <div class="admin-container">
             <!-- ЛЕВАЯ КОЛОНКА: ФОРМА РЕДАКТИРОВАНИЯ -->
             <div class="edit-panel">
-                <h2 class="admin-section-title">✏️ Павильон</h2>
+                <h2 class="admin-section-title">Корпус → Этаж → Павильон</h2>
 
                 <form id="pavilion-form">
                     <!-- ЭТАЖ -->
@@ -78,10 +78,36 @@
                         </select>
                     </div>
 
+                    <!-- КОРПУС -->
+                    <div class="form-group">
+                        <label for="building-select">Корпус</label>
+                        <select id="building-select" required style="max-width: 70%; width: 100%; padding: var(--spacing-sm) var(--spacing-md); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-size: var(--font-size-base);">
+                            <option value="">Выберите корпус</option>
+                            <option value="A">Корпус A</option>
+                            <option value="B">Корпус B</option>
+                            <option value="C">Корпус C</option>
+                            <option value="D">Корпус D</option>
+                            <option value="33">Корпус 33</option>
+                        </select>
+                        <button type="button" class="btn btn-secondary" onclick="showAddBuildingModal()" style="margin-top: var(--spacing-sm); width: 100%; max-width: 70%;">Добавить свой корпус</button>
+                    </div>
+
+                    <!-- ПЛАН ЭТАЖА КОРПУСА 33 -->
+                    <div class="form-group" id="floor-plan-container" style="display: none;">
+                        <label>План этажа (кликните для указания позиции)</label>
+                        <div style="border: 2px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; max-width: 100%; background: #f0f0f0; position: relative;">
+                            <img id="floor-plan-image" src="/images/floor-plans/building_33_floor_1.png" alt="План этажа" style="width: 100%; height: auto; display: block; cursor: crosshair;">
+                            <canvas id="floor-plan-canvas" style="position: absolute; top: 0; left: 0; cursor: crosshair; display: none;"></canvas>
+                        </div>
+                        <div style="font-size: var(--font-size-xs); color: var(--color-text-light); margin-top: var(--spacing-xs);" id="coords-display"></div>
+                        <input type="hidden" id="pavilion-x" value="">
+                        <input type="hidden" id="pavilion-y" value="">
+                    </div>
+
                     <!-- НОМЕР ПАВИЛЬОНА -->
                     <div class="form-group">
-                        <label for="location-input">Номер павильона (только чтение)</label>
-                        <input type="text" id="location-input" readonly placeholder="Будет заполнен при клике на карте">
+                        <label for="location-input">Номер павильона (в выбранном корпусе на этаже) *</label>
+                        <input type="text" id="location-input" placeholder="Например: 123, A-45" required>
                     </div>
 
                     <!-- НАЗВАНИЕ МАГАЗИНА -->
@@ -92,16 +118,18 @@
 
                     <!-- КАТЕГОРИЯ -->
                     <div class="form-group">
-                        <label>Категория *</label>
-                        <div class="category-chips" id="category-chips">
-                            <button type="button" class="category-chip" data-category="clothing">👕 Одежда</button>
-                            <button type="button" class="category-chip" data-category="shoes">👞 Обувь</button>
-                            <button type="button" class="category-chip" data-category="accessories">✨ Аксессуары</button>
-                            <button type="button" class="category-chip" data-category="electronics">📱 Электроника</button>
-                            <button type="button" class="category-chip" data-category="cosmetics">💄 Косметика</button>
-                            <button type="button" class="category-chip" data-category="sports">⚽ Спорт</button>
-                            <button type="button" class="category-chip" data-category="other">📦 Прочее</button>
-                        </div>
+                        <label for="category-select">Категория *</label>
+                        <select id="category-select" class="form-select" required style="max-width: 70%; width: 100%; padding: var(--spacing-sm) var(--spacing-md); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-size: var(--font-size-base);">
+                            <option value="">Выберите категорию</option>
+                            <option value="clothing">Одежда</option>
+                            <option value="shoes">Обувь</option>
+                            <option value="accessories">Аксессуары</option>
+                            <option value="electronics">Электроника</option>
+                            <option value="cosmetics">Косметика</option>
+                            <option value="sports">Спорт</option>
+                            <option value="other">Прочее</option>
+                        </select>
+                        <button type="button" class="btn btn-secondary" onclick="showAddCategoryModal()" style="margin-top: var(--spacing-sm); width: 100%; max-width: 70%;">Добавить свою категорию</button>
                         <input type="hidden" id="category-input" required>
                     </div>
 
@@ -129,7 +157,7 @@
                     <div class="form-group">
                         <label for="image-input">Изображение (макс. 2 МБ)</label>
                         <div class="image-upload-area" onclick="document.getElementById('image-input').click()">
-                            <p>📸 Кликните или перетащите изображение</p>
+                            <p>Кликните или перетащите изображение</p>
                         </div>
                         <input type="file" id="image-input" accept="image/*" style="display: none;">
                         <img id="image-preview" class="image-preview" style="display: none;">
@@ -146,21 +174,21 @@
                             </div>
                         </div>
                         <button type="button" class="btn btn-secondary" style="width: 100%; margin-top: var(--spacing-md);" onclick="showAddDiscountModal()">
-                            ➕ Добавить скидку
+                            Добавить скидку
                         </button>
                     </div>
 
                     <!-- КНОПКИ -->
                     <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-xl);">
-                        <button type="submit" class="btn btn-primary" style="flex: 1;">💾 Сохранить</button>
-                        <button type="reset" class="btn btn-secondary" style="flex: 1;">↺ Отмена</button>
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">Сохранить</button>
+                        <button type="reset" class="btn btn-secondary" style="flex: 1;">Отмена</button>
                     </div>
                 </form>
             </div>
 
             <!-- ПРАВАЯ КОЛОНКА: ПРЕДПРОМОТР КАРТЫ -->
             <div class="preview-panel">
-                <h2 class="admin-section-title">🗺️ Карта</h2>
+                <h2 class="admin-section-title">Карта</h2>
 
                 <!-- ВЫБОР ЭТАЖА -->
                 <div class="map-section">
@@ -178,7 +206,7 @@
                 <div class="map-section">
                     <div class="map-container-mini" id="map-mini">
                         <div class="map-hint">
-                            <p>📍 Нажмите на карте, чтобы установить локацию павильона</p>
+                            <p>Нажмите на карте, чтобы установить локацию павильона в корпусе</p>
                         </div>
                         <div id="mini-map" style="width:100%; height:300px;"></div>
                     </div>
@@ -187,20 +215,21 @@
                 <!-- ИНФОРМАЦИЯ -->
                 <div style="margin-top: var(--spacing-lg); padding: var(--spacing-md); background: var(--color-bg-light); border-radius: var(--radius-md);">
                     <p style="font-size: var(--font-size-sm); margin: 0;">
-                        <strong>💡 Совет:</strong> Кликните на карте справа в нужное место, чтобы установить координаты вашего павильона.
+                        <strong>Совет:</strong> Выберите корпус, этаж и кликните на карте справа, чтобы установить координаты вашего павильона.
                     </p>
                 </div>
             </div>
         </div>
 
-        <!-- СПИСОК ПАВИЛЬОНОВ -->
+        <!-- СПИСОК ПАВИЛЬОНОВ (ПО КОРПУСАМ И ЭТАЖАМ) -->
         <section class="pavilions-list-section">
-            <h2 class="admin-section-title">📋 Мои павильоны</h2>
+            <h2 class="admin-section-title">Мои павильоны (по корпусам)</h2>
             
             <div style="overflow-x: auto;">
                 <table class="pavilions-table" id="pavilions-table">
                     <thead>
                         <tr>
+                            <th>Корпус</th>
                             <th>Этаж</th>
                             <th>Номер</th>
                             <th>Название</th>
@@ -212,7 +241,7 @@
                     <tbody id="pavilions-table-body">
                         <tr>
                             <td colspan="6" style="text-align: center; padding: var(--spacing-lg); color: var(--color-text-light);">
-                                Загрузка павильонов...
+                                Загрузка павильонов из всех корпусов...
                             </td>
                         </tr>
                     </tbody>
@@ -221,12 +250,61 @@
         </section>
     </main>
 
+    <!-- МОДАЛЬНОЕ ОКНО: ДОБАВИТЬ КОРПУС -->
+    <div id="add-building-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Добавить корпус</h3>
+                <button class="modal-close" onclick="hideAddBuildingModal()">Закрыть</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="new-building-input">Название корпуса *</label>
+                    <input type="text" id="new-building-input" class="form-input" placeholder="Например: E, Новый" maxlength="10" style="width: 100%; padding: var(--spacing-sm);">
+                    <div id="building-error" style="margin-top: var(--spacing-xs); color: #c00; font-size: var(--font-size-sm); display: none;"></div>
+                    <div style="margin-top: var(--spacing-xs); font-size: var(--font-size-xs); color: var(--color-text-light);">
+                        Длина: 1-10 символов.
+                    </div>
+                </div>
+                <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-lg);">
+                    <button type="button" class="btn btn-primary" onclick="saveNewBuilding()" style="flex: 1;">Добавить</button>
+                    <button type="button" class="btn btn-secondary" onclick="hideAddBuildingModal()" style="flex: 1;">Отмена</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО: ДОБАВИТЬ КАТЕГОРИЮ -->
+    <div id="add-category-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Добавить категорию</h3>
+                <button class="modal-close" onclick="hideAddCategoryModal()">Закрыть</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="new-category-input">Название категории *</label>
+                    <input type="text" id="new-category-input" class="form-input" placeholder="Например: Украшения" maxlength="20" style="width: 100%; padding: var(--spacing-sm);">
+                    <div id="category-suggestions" style="margin-top: var(--spacing-xs); font-size: var(--font-size-sm); color: var(--color-text-light);"></div>
+                    <div id="category-error" style="margin-top: var(--spacing-xs); color: #c00; font-size: var(--font-size-sm); display: none;"></div>
+                    <div style="margin-top: var(--spacing-xs); font-size: var(--font-size-xs); color: var(--color-text-light);">
+                        Только буквы, пробелы и дефисы. Длина: 2-20 символов.
+                    </div>
+                </div>
+                <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-lg);">
+                    <button type="button" class="btn btn-primary" onclick="saveNewCategory()" style="flex: 1;">Добавить</button>
+                    <button type="button" class="btn btn-secondary" onclick="hideAddCategoryModal()" style="flex: 1;">Отмена</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- МОДАЛЬНОЕ ОКНО: ДОБАВИТЬ СКИДКУ -->
     <div id="discount-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>➕ Добавить скидку</h3>
-                <button class="modal-close" onclick="hideAddDiscountModal()">✕</button>
+                <h3>Добавить скидку</h3>
+                <button class="modal-close" onclick="hideAddDiscountModal()">Закрыть</button>
             </div>
             <form id="discount-form">
                 <div class="form-group">
@@ -264,7 +342,7 @@
         // ИНИЦИАЛИЗАЦИЯ АДМИН-ПАНЕЛИ
         // ============================================================
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 Admin: Инициализация админ-панели');
+            console.log('Admin: Инициализация админ-панели');
             
             // Используем API из admin.js
             if (window.Admin && typeof window.Admin.init === 'function') {
@@ -274,13 +352,232 @@
                     console.error('❌ Admin: Ошибка инициализации', error);
                 }
             } else {
-                console.warn('⚠️ Admin: window.Admin.init не найден');
+                console.warn('Admin: window.Admin.init не найден');
             }
         });
 
         // ============================================================
         // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ UI
         // ============================================================
+
+        // Управление корпусами
+        const existingBuildings = ['A', 'B', 'C', 'D'];
+
+        function showAddBuildingModal() {
+            document.getElementById('add-building-modal').style.display = 'flex';
+            document.getElementById('new-building-input').value = '';
+            document.getElementById('building-error').style.display = 'none';
+            document.getElementById('new-building-input').focus();
+        }
+
+        function hideAddBuildingModal() {
+            document.getElementById('add-building-modal').style.display = 'none';
+        }
+
+        function validateBuilding(input) {
+            const cleaned = input.trim();
+            
+            if (cleaned.length < 1 || cleaned.length > 10) {
+                return { valid: false, error: 'Длина должна быть от 1 до 10 символов' };
+            }
+            
+            if (existingBuildings.includes(cleaned.toUpperCase())) {
+                return { valid: false, error: 'Такой корпус уже существует' };
+            }
+            
+            return { valid: true, cleaned: cleaned };
+        }
+
+        function saveNewBuilding() {
+            const input = document.getElementById('new-building-input').value;
+            const errorDiv = document.getElementById('building-error');
+            
+            const validation = validateBuilding(input);
+            
+            if (!validation.valid) {
+                errorDiv.textContent = validation.error;
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            const buildingSelect = document.getElementById('building-select');
+            const newOption = document.createElement('option');
+            const buildingValue = validation.cleaned.toUpperCase();
+            newOption.value = buildingValue;
+            newOption.textContent = 'Корпус ' + buildingValue;
+            
+            buildingSelect.appendChild(newOption);
+            buildingSelect.value = buildingValue;
+            existingBuildings.push(buildingValue);
+            
+            alert('Корпус "' + buildingValue + '" успешно добавлен!');
+            hideAddBuildingModal();
+        }
+
+        // Управление категориями
+        const existingCategories = [
+            'одежда', 'обувь', 'аксессуары', 'электроника', 'косметика', 'спорт', 'прочее'
+        ];
+
+        function showAddCategoryModal() {
+            document.getElementById('add-category-modal').style.display = 'flex';
+            document.getElementById('new-category-input').value = '';
+            document.getElementById('category-error').style.display = 'none';
+            document.getElementById('category-suggestions').textContent = '';
+            document.getElementById('new-category-input').focus();
+        }
+
+        function hideAddCategoryModal() {
+            document.getElementById('add-category-modal').style.display = 'none';
+        }
+
+        function validateCategory(input) {
+            // Удаляем лишние пробелы и приводим к нижнему регистру
+            const cleaned = input.trim().toLowerCase().replace(/\s+/g, ' ');
+            
+            // Проверка длины
+            if (cleaned.length < 2 || cleaned.length > 20) {
+                return { valid: false, error: 'Длина должна быть от 2 до 20 символов' };
+            }
+            
+            // Проверка на специальные символы (только буквы, пробелы, дефисы)
+            if (!/^[а-яёa-z\s-]+$/i.test(cleaned)) {
+                return { valid: false, error: 'Используйте только буквы, пробелы и дефисы' };
+            }
+            
+            // Проверка на дубликаты
+            if (existingCategories.includes(cleaned)) {
+                return { valid: false, error: 'Такая категория уже существует' };
+            }
+            
+            return { valid: true, cleaned: cleaned };
+        }
+
+        function getSimilarCategories(input) {
+            if (!input || input.length < 2) return [];
+            
+            const normalized = input.toLowerCase();
+            return existingCategories.filter(cat => 
+                cat.includes(normalized) || normalized.includes(cat)
+            );
+        }
+
+        // Автодополнение при вводе
+        document.addEventListener('DOMContentLoaded', () => {
+            const categoryInput = document.getElementById('new-category-input');
+            if (categoryInput) {
+                categoryInput.addEventListener('input', (e) => {
+                    const value = e.target.value.trim();
+                    const suggestionsDiv = document.getElementById('category-suggestions');
+                    const errorDiv = document.getElementById('category-error');
+                    
+                    if (value.length >= 2) {
+                        const similar = getSimilarCategories(value);
+                        if (similar.length > 0) {
+                            suggestionsDiv.textContent = 'Похожие категории: ' + similar.join(', ');
+                            suggestionsDiv.style.color = '#ff6b35';
+                        } else {
+                            suggestionsDiv.textContent = '';
+                        }
+                        
+                        // Проверка валидности в реальном времени
+                        const validation = validateCategory(value);
+                        if (!validation.valid) {
+                            errorDiv.textContent = validation.error;
+                            errorDiv.style.display = 'block';
+                        } else {
+                            errorDiv.style.display = 'none';
+                        }
+                    } else {
+                        suggestionsDiv.textContent = '';
+                        errorDiv.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Обновляем скрытое поле при выборе категории
+            const categorySelect = document.getElementById('category-select');
+            if (categorySelect) {
+                categorySelect.addEventListener('change', (e) => {
+                    document.getElementById('category-input').value = e.target.value;
+                });
+            }
+            
+            // Обработка выбора корпуса 33 и отображение плана этажа
+            const buildingSelect = document.getElementById('building-select');
+            const floorPlanContainer = document.getElementById('floor-plan-container');
+            if (buildingSelect) {
+                buildingSelect.addEventListener('change', (e) => {
+                    if (e.target.value === '33') {
+                        floorPlanContainer.style.display = 'block';
+                        setupFloorPlanClick();
+                    } else {
+                        floorPlanContainer.style.display = 'none';
+                    }
+                });
+            }
+        });
+
+        function setupFloorPlanClick() {
+            const floorPlanImage = document.getElementById('floor-plan-image');
+            const coordsDisplay = document.getElementById('coords-display');
+            const xInput = document.getElementById('pavilion-x');
+            const yInput = document.getElementById('pavilion-y');
+            
+            if (floorPlanImage) {
+                floorPlanImage.addEventListener('click', (e) => {
+                    const rect = floorPlanImage.getBoundingClientRect();
+                    const x = Math.round(e.clientX - rect.left);
+                    const y = Math.round(e.clientY - rect.top);
+                    
+                    xInput.value = x;
+                    yInput.value = y;
+                    coordsDisplay.textContent = `Позиция: X=${x}, Y=${y}`;
+                    
+                    // Отправляем координаты в скрытые поля для сохранения
+                    console.log('Павильон позиция установлена: x=' + x + ', y=' + y);
+                });
+            }
+        }
+
+        function hideAddCategoryModal() {
+            document.getElementById('add-category-modal').style.display = 'none';
+        }
+
+        function saveNewCategory() {
+            const input = document.getElementById('new-category-input').value;
+            const errorDiv = document.getElementById('category-error');
+            
+            const validation = validateCategory(input);
+            
+            if (!validation.valid) {
+                errorDiv.textContent = validation.error;
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Добавляем категорию в список
+            const categorySelect = document.getElementById('category-select');
+            const newOption = document.createElement('option');
+            const categoryValue = validation.cleaned.replace(/\s+/g, '-');
+            newOption.value = categoryValue;
+            newOption.textContent = validation.cleaned.charAt(0).toUpperCase() + validation.cleaned.slice(1);
+            
+            // Вставляем перед последней опцией (которая может быть "Прочее")
+            categorySelect.appendChild(newOption);
+            
+            // Выбираем новую категорию
+            categorySelect.value = categoryValue;
+            document.getElementById('category-input').value = categoryValue;
+            
+            // Добавляем в список существующих
+            existingCategories.push(validation.cleaned);
+            
+            // Показываем уведомление
+            alert('Категория "' + newOption.textContent + '" успешно добавлена!');
+            
+            hideAddCategoryModal();
+        }
 
         function showAddDiscountModal() {
             document.getElementById('discount-modal').style.display = 'flex';

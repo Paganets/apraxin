@@ -164,6 +164,9 @@ out/
 # PWA Service Worker cache
 /workspaces/apraxin/apra-shka-map/sw-cache/
 
+# Папки с изображениями планов помещений
+apra-shka-map/images/floor-plans/
+
 # Документы с конфиденциальной информацией
 PASSWORDS.md
 KEYS.md

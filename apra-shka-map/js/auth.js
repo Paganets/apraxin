@@ -295,21 +295,24 @@ async function handleLoginFormSubmit(event) {
   try {
     AuthState.isLoading = true;
     
-    // Получаем номер телефона из формы
+    // Получаем значение из поля (ожидаем только 10 цифр без кода страны)
     const phoneInput = document.getElementById('phone-input') || 
                        event.target.querySelector('input[type="tel"]');
     if (!phoneInput) {
       throw new Error('Поле ввода номера телефона не найдено');
     }
-    
-    const phone = phoneInput.value;
-    console.log('📱 Введён номер телефона (сырой):', phone);
-    console.log('📝 Длина номера:', phone.length, 'символов');
-    
-    // Форматируем номер
-    const formattedPhone = formatPhoneNumber(phone);
-    console.log('✅ Отформатирован номер:', formattedPhone);
-    console.log('✓ Формат: +7 + 10 цифр =', formattedPhone.length, 'символов');
+
+    const raw = String(phoneInput.value || '');
+    console.log('📱 Введён номер (сырой, без префикса):', raw);
+
+    // Удаляем все нецифровые символы и берём первые 10 цифр (это цифры после +7)
+    const cleanPhone = raw.replace(/[^0-9]/g, '').slice(0, 10);
+    if (cleanPhone.length !== 10) {
+      throw new Error('Номер телефона должен содержать 10 цифр после кода +7');
+    }
+
+    const formattedPhone = `+7${cleanPhone}`;
+    console.log('✅ Сформирован полный номер:', formattedPhone);
     
     // Проверяем номер в БД
     console.log('🔄 Отправляем запрос в Supabase...');
