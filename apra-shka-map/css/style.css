@@ -803,12 +803,13 @@ pre {
 }
 
 .btn-primary {
-  background-color: var(--color-primary);
-  color: var(--color-white);
+  background-color: #2a2a2a;
+  color: #cccccc;
+  border: 1px solid #3a3a3a;
 }
 
 .btn-primary:hover {
-  background-color: #222;
+  background-color: #3a3a3a;
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
