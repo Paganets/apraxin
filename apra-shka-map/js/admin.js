@@ -503,22 +503,26 @@
     const building = el('building-select') ? el('building-select').value : '';
     const floorPlanContainer = el('floor-plan-container');
     
-    // Для корпуса 33: показываем план и инициализируем его
-    if (building === '33' && floor && window.FloorPlan) {
+    // План этажа доступен ТОЛЬКО для корпуса 33 и ТОЛЬКО для этажа 1
+    if (building === '33' && floor === '1' && window.FloorPlan) {
       if (floorPlanContainer) floorPlanContainer.style.display = 'block';
       
       const allPavilions = currentPavilions || [];
-      window.FloorPlan.init(building, parseInt(floor), allPavilions);
+      window.FloorPlan.init(building, 1, allPavilions);
       
-      showMessage(`Загружен план: Корпус 33, этаж ${floor}`, 'success');
+      showMessage('✓ План этажа загружен', 'success');
     } else {
-      showMessage(`Этаж ${floor} выбран`, 'info');
+      // Скрываем контейнер если этаж не 1 или корпус не 33
+      if (floorPlanContainer) floorPlanContainer.style.display = 'none';
+      if (floor) {
+        showMessage(`Этаж ${floor} выбран`, 'info');
+      }
     }
   }
 
   /**
    * Обработчик выбора корпуса
-   * Готовит UI, но план показывается только после выбора этажа
+   * Скрывает план если не корпус 33 или если этаж не 1
    */
   function selectBuilding(building) {
     miniMapState.building = building;
@@ -526,11 +530,10 @@
     const floorPlanContainer = el('floor-plan-container');
     const floorInput = el('floor-input');
     
-    // Для корпуса 33: сбрасываем этаж и скрываем план до выбора этажа
+    // Для корпуса 33: скрываем план до выбора этажа 1
     if (building === '33') {
-      if (floorInput) floorInput.value = ''; // Сбрасываем выбор этажа
       if (floorPlanContainer) floorPlanContainer.style.display = 'none';
-      showMessage('Выберите этаж для работы с планом', 'info');
+      showMessage('Выбранный корпус: 33. План появится при выборе этажа 1', 'info');
     } else {
       if (floorPlanContainer) floorPlanContainer.style.display = 'none';
       showMessage(`Корпус ${building} выбран`, 'info');
