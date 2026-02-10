@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Управление скидками — Карта Апрашки">
+    <meta name="theme-color" content="#000000">
+    <title>Управление скидками — Карта Апрашки</title>
+    
+    <!-- Supabase Configuration -->
+    <meta name="supabase-anon-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhZ3B1dWNkbmtyendzbW5ieW1rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MDMxMjYsImV4cCI6MjA4NjA3OTEyNn0.T3vEY9VfxIQ19AtWPkwk6xiqAZe6sEzG-Ke73olUPsY">
+    <meta name="supabase-url" content="https://qagpuucdnkrzwsmnbymk.supabase.co">
+    
+    <script>
+        window.SupabaseConfig = {
+            url: document.querySelector('meta[name="supabase-url"]').content.trim(),
+            anonKey: document.querySelector('meta[name="supabase-anon-key"]').content.trim()
+        };
+    </script>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Стили -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <!-- ШАПКА -->
+    <header class="admin-header">
+        <div class="admin-header-title">
+            <h1>Управление скидками</h1>
+        </div>
+        <div class="admin-header-user" id="user-info">
+            <span id="user-name">Загрузка...</span>
+            <button class="btn btn-secondary" onclick="window.location.href='./admin.html'" style="margin-right: 8px;">Назад</button>
+            <button class="btn btn-primary" onclick="handleLogout()">Выход</button>
+        </div>
+    </header>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <main class="app-main">
+        <!-- ЗАГОЛОВОК И КНОПКА ДОБАВЛЕНИЯ -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xl);">
+            <h2 class="admin-section-title">Мои скидки</h2>
+            <button class="btn btn-primary" onclick="showAddDiscountModal()">+ Добавить скидку</button>
+        </div>
+
+        <!-- СПИСОК СКИДОК -->
+        <div id="discounts-container">
+            <div id="discounts-list" style="display: grid; gap: var(--spacing-lg);">
+                <p style="color: var(--color-text-light); text-align: center; padding: var(--spacing-xl);">
+                    Загрузка скидок...
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- МОДАЛЬНОЕ ОКНО: ДОБАВИТЬ/РЕДАКТИРОВАТЬ СКИДКУ -->
+    <div id="discount-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="discount-modal-title">Добавить скидку</h3>
+                <button class="modal-close" onclick="hideAddDiscountModal()">✕</button>
+            </div>
+            <form id="discount-form">
+                <input type="hidden" id="discount-id">
+                <input type="hidden" id="discount-pavilion-id">
+                
+                <div class="form-group">
+                    <label for="discount-pavilion-select">Павильон *</label>
+                    <select id="discount-pavilion-select" required>
+                        <option value="">Выберите павильон</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="discount-title">Название скидки *</label>
+                    <input type="text" id="discount-title" placeholder="24-часовая распродажа" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="discount-desc">Описание *</label>
+                    <textarea id="discount-desc" placeholder="20% на все товары" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="discount-date">Дата окончания</label>
+                    <input type="date" id="discount-date">
+                </div>
+                
+                <div class="form-group">
+                    <label for="discount-product">На какой товар</label>
+                    <input type="text" id="discount-product" placeholder="Все товары / Верхняя одежда / и т.д.">
+                </div>
+                
+                <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-xl);">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Сохранить</button>
+                    <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="hideAddDiscountModal()">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- СКРИПТЫ -->
+    <script src="js/pwa.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
+
+    <script>
+        // Глобальные переменные
+        let currentUser = null;
+        let currentPavilions = [];
+        let currentDiscounts = [];
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🎯 Discounts page: DOMContentLoaded');
+            
+            // Проверяем авторизацию
+            if (window.Auth && typeof window.Auth.requireAuth === 'function') {
+                const isAuth = await window.Auth.requireAuth();
+                if (!isAuth) {
+                    console.log('❌ Пользователь не авторизован, перенаправление...');
+                    return;
+                }
+            }
+
+            // Получаем текущего пользователя
+            if (window.Auth && typeof window.Auth.getCurrentTenant === 'function') {
+                currentUser = window.Auth.getCurrentTenant();
+                console.log('👤 Текущий пользователь:', currentUser);
+                updateUserInfo();
+            }
+
+            // Загружаем павильоны
+            await loadPavilions();
+            
+            // Загружаем скидки
+            await loadDiscounts();
+        });
+
+        // Обновление информации о пользователе
+        function updateUserInfo() {
+            const userNameEl = document.getElementById('user-name');
+            if (userNameEl && currentUser) {
+                userNameEl.textContent = currentUser.name || currentUser.phone || 'Пользователь';
+            }
+        }
+
+        // Загрузка павильонов пользователя
+        async function loadPavilions() {
+            try {
+                if (!currentUser || !currentUser.phone) {
+                    console.error('❌ Нет данных пользователя');
+                    return;
+                }
+
+                const url = `${window.SupabaseConfig.url}/rest/v1/pavilions?owner_phone=eq.${encodeURIComponent(currentUser.phone)}&select=*`;
+                const response = await fetch(url, {
+                    headers: {
+                        'apikey': window.SupabaseConfig.anonKey,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Ошибка загрузки павильонов');
+
+                currentPavilions = await response.json();
+                console.log('📦 Загружено павильонов:', currentPavilions.length);
+
+                // Заполняем select с павильонами
+                const select = document.getElementById('discount-pavilion-select');
+                if (select) {
+                    select.innerHTML = '<option value="">Выберите павильон</option>';
+                    currentPavilions.forEach(p => {
+                        select.innerHTML += `<option value="${p.id}">${p.name} (${p.location})</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('❌ Ошибка загрузки павильонов:', error);
+            }
+        }
+
+        // Загрузка всех скидок пользователя
+        async function loadDiscounts() {
+            const container = document.getElementById('discounts-list');
+            if (!container) return;
+
+            try {
+                if (!currentPavilions || currentPavilions.length === 0) {
+                    container.innerHTML = '<p style="color: var(--color-text-light); text-align: center; padding: var(--spacing-xl);">У вас пока нет павильонов. Создайте павильон, чтобы добавлять скидки.</p>';
+                    return;
+                }
+
+                // Собираем все скидки из всех павильонов
+                currentDiscounts = [];
+                currentPavilions.forEach(pavilion => {
+                    if (Array.isArray(pavilion.discounts)) {
+                        pavilion.discounts.forEach(discount => {
+                            currentDiscounts.push({
+                                ...discount,
+                                pavilion_id: pavilion.id,
+                                pavilion_name: pavilion.name,
+                                pavilion_location: pavilion.location
+                            });
+                        });
+                    }
+                });
+
+                console.log('💰 Всего скидок:', currentDiscounts.length);
+
+                if (currentDiscounts.length === 0) {
+                    container.innerHTML = '<p style="color: var(--color-text-light); text-align: center; padding: var(--spacing-xl);">Пока нет активных скидок. Нажмите "+ Добавить скидку" чтобы создать первую.</p>';
+                    return;
+                }
+
+                // Отображаем скидки
+                container.innerHTML = currentDiscounts.map(discount => `
+                    <div class="discount-card" style="background: var(--color-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); box-shadow: var(--shadow);">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--spacing-md);">
+                            <div>
+                                <h3 style="margin: 0 0 var(--spacing-xs) 0; color: var(--color-primary);">${discount.title || 'Без названия'}</h3>
+                                <p style="margin: 0; font-size: var(--font-size-sm); color: var(--color-text-light);">
+                                    ${discount.pavilion_name} · ${discount.pavilion_location}
+                                </p>
+                            </div>
+                            <div style="display: flex; gap: var(--spacing-sm);">
+                                <button class="btn btn-secondary" onclick="editDiscount('${discount.pavilion_id}', ${discount.id || 0})" style="padding: var(--spacing-sm) var(--spacing-md); font-size: var(--font-size-sm);">Изменить</button>
+                                <button class="btn btn-danger" onclick="deleteDiscount('${discount.pavilion_id}', ${discount.id || 0})" style="padding: var(--spacing-sm) var(--spacing-md); font-size: var(--font-size-sm);">Удалить</button>
+                            </div>
+                        </div>
+                        <p style="margin: 0 0 var(--spacing-sm) 0; color: var(--color-text);">${discount.description || ''}</p>
+                        ${discount.validUntil ? `<p style="margin: 0; font-size: var(--font-size-sm); color: var(--color-text-light);">⏱ Действует до: ${new Date(discount.validUntil).toLocaleDateString('ru-RU')}</p>` : ''}
+                        ${discount.applicableProducts ? `<p style="margin: var(--spacing-xs) 0 0 0; font-size: var(--font-size-sm); color: var(--color-text-light);">🏷️ Товары: ${discount.applicableProducts}</p>` : ''}
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('❌ Ошибка загрузки скидок:', error);
+                container.innerHTML = '<p style="color: var(--color-danger); text-align: center; padding: var(--spacing-xl);">Ошибка загрузки скидок. Попробуйте обновить страницу.</p>';
+            }
+        }
+
+        // Показать модальное окно добавления
+        function showAddDiscountModal() {
+            const modal = document.getElementById('discount-modal');
+            const form = document.getElementById('discount-form');
+            const title = document.getElementById('discount-modal-title');
+            
+            if (form) form.reset();
+            if (title) title.textContent = 'Добавить скидку';
+            if (modal) modal.style.display = 'flex';
+        }
+
+        // Скрыть модальное окно
+        function hideAddDiscountModal() {
+            const modal = document.getElementById('discount-modal');
+            const form = document.getElementById('discount-form');
+            
+            if (form) form.reset();
+            if (modal) modal.style.display = 'none';
+        }
+
+        // Редактировать скидку
+        async function editDiscount(pavilionId, discountIndex) {
+            console.log('✏️ Редактирование скидки:', pavilionId, discountIndex);
+            
+            const pavilion = currentPavilions.find(p => p.id === pavilionId);
+            if (!pavilion || !pavilion.discounts || !pavilion.discounts[discountIndex]) {
+                alert('Скидка не найдена');
+                return;
+            }
+
+            const discount = pavilion.discounts[discountIndex];
+            
+            // Заполняем форму
+            document.getElementById('discount-id').value = discountIndex;
+            document.getElementById('discount-pavilion-id').value = pavilionId;
+            document.getElementById('discount-pavilion-select').value = pavilionId;
+            document.getElementById('discount-pavilion-select').disabled = true;
+            document.getElementById('discount-title').value = discount.title || '';
+            document.getElementById('discount-desc').value = discount.description || '';
+            document.getElementById('discount-date').value = discount.validUntil || '';
+            document.getElementById('discount-product').value = discount.applicableProducts || '';
+            
+            document.getElementById('discount-modal-title').textContent = 'Редактировать скидку';
+            document.getElementById('discount-modal').style.display = 'flex';
+        }
+
+        // Удалить скидку
+        async function deleteDiscount(pavilionId, discountIndex) {
+            if (!confirm('Удалить эту скидку?')) return;
+
+            try {
+                const pavilion = currentPavilions.find(p => p.id === pavilionId);
+                if (!pavilion) throw new Error('Павильон не найден');
+
+                const updatedDiscounts = [...(pavilion.discounts || [])];
+                updatedDiscounts.splice(discountIndex, 1);
+
+                const url = `${window.SupabaseConfig.url}/rest/v1/pavilions?id=eq.${pavilionId}`;
+                const response = await fetch(url, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': window.SupabaseConfig.anonKey,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify({ discounts: updatedDiscounts })
+                });
+
+                if (!response.ok) throw new Error('Ошибка удаления скидки');
+
+                alert('Скидка удалена');
+                await loadPavilions();
+                await loadDiscounts();
+
+            } catch (error) {
+                console.error('❌ Ошибка удаления:', error);
+                alert('Ошибка при удалении скидки: ' + error.message);
+            }
+        }
+
+        // Обработчик формы
+        document.getElementById('discount-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            try {
+                const pavilionId = document.getElementById('discount-pavilion-select').value;
+                const discountId = document.getElementById('discount-id').value;
+                
+                if (!pavilionId) {
+                    alert('Выберите павильон');
+                    return;
+                }
+
+                const pavilion = currentPavilions.find(p => p.id === pavilionId);
+                if (!pavilion) throw new Error('Павильон не найден');
+
+                const discountData = {
+                    title: document.getElementById('discount-title').value,
+                    description: document.getElementById('discount-desc').value,
+                    validUntil: document.getElementById('discount-date').value || null,
+                    applicableProducts: document.getElementById('discount-product').value || null
+                };
+
+                let updatedDiscounts = [...(pavilion.discounts || [])];
+                
+                if (discountId !== '') {
+                    // Редактирование
+                    updatedDiscounts[parseInt(discountId)] = discountData;
+                } else {
+                    // Добавление
+                    updatedDiscounts.push(discountData);
+                }
+
+                const url = `${window.SupabaseConfig.url}/rest/v1/pavilions?id=eq.${pavilionId}`;
+                const response = await fetch(url, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': window.SupabaseConfig.anonKey,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify({ discounts: updatedDiscounts })
+                });
+
+                if (!response.ok) throw new Error('Ошибка сохранения скидки');
+
+                alert('Скидка сохранена');
+                hideAddDiscountModal();
+                await loadPavilions();
+                await loadDiscounts();
+
+            } catch (error) {
+                console.error('❌ Ошибка сохранения:', error);
+                alert('Ошибка при сохранении: ' + error.message);
+            }
+        });
+
+        // Закрытие модального окна по клику на фон
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('discount-modal');
+            if (e.target === modal) {
+                hideAddDiscountModal();
+            }
+        });
+
+        // Logout
+        function handleLogout() {
+            if (confirm('Вы уверены, что хотите выйти?')) {
+                if (window.Auth && typeof window.Auth.logout === 'function') {
+                    window.Auth.logout();
+                }
+            }
+        }
+    </script>
+</body>
+</html>

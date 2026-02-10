@@ -151,6 +151,16 @@
   box-shadow: inset 0 0 0 2px var(--color-primary);
 }
 
+/* КАРТОЧКА СКИДКИ */
+.discount-card {
+  transition: all var(--transition-fast);
+}
+
+.discount-card:hover {
+  box-shadow: var(--shadow-lg) !important;
+  transform: translateY(-2px);
+}
+
 /* КАТЕГОРИИ */
 .category-chips {
   display: flex;
