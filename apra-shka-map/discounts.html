@@ -43,7 +43,10 @@
         <!-- ЗАГОЛОВОК И КНОПКА ДОБАВЛЕНИЯ -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xl);">
             <h2 class="admin-section-title">Мои скидки</h2>
-            <button class="btn btn-primary" onclick="showAddDiscountModal()">+ Добавить скидку</button>
+            <div style="display: flex; gap: var(--spacing-sm);">
+                <button class="btn btn-secondary" onclick="window.location.href='./admin.html'">Назад</button>
+                <button class="btn btn-primary" onclick="showAddDiscountModal()">+ Добавить скидку</button>
+            </div>
         </div>
 
         <!-- СПИСОК СКИДОК -->

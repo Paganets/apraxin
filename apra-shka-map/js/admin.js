@@ -127,13 +127,14 @@
       currentEditingPavilion = p;
 
       // Проставляем поля (под именами полей в admin.html)
-      if (el('form-pavilion-id')) el('form-pavilion-id').value = p.id || '';
+      if (el('pavilion-id')) el('pavilion-id').value = p.id || '';
       if (el('building-select')) el('building-select').value = p.building || '';
       if (el('floor-input')) el('floor-input').value = p.floor || '';
       if (el('location-input')) el('location-input').value = p.pavilion_number || '';
-      if (el('name-input')) el('name-input').value = p.shop_name || '';
+      if (el('name-input')) el('name-input').value = p.shop_name || p.name || '';
       if (el('category-select')) el('category-select').value = p.category || '';
-      if (el('form-pavilion-desc')) el('form-pavilion-desc').value = p.description || '';
+      if (el('category-input')) el('category-input').value = p.category || '';
+      if (el('brand-color-input')) el('brand-color-input').value = p.brand_color || '#FF6B35';
 
       // Координаты - сохраняем в hidden inputs
       if (p.coordinates) {
@@ -162,9 +163,11 @@
       }
 
       // Изображение предпросмотр
-      if (p.image_url && el('form-pavilion-image-preview')) {
-        el('form-pavilion-image-preview').src = p.image_url;
+      if (p.image_url && el('image-preview')) {
+        el('image-preview').src = p.image_url;
+        el('image-preview').style.display = 'block';
       }
+      if (el('image-url')) el('image-url').value = p.image_url || '';
 
       // Скидки
       if (p.discounts) renderDiscountsForm(p.discounts);
@@ -181,7 +184,8 @@
   // Проверка валидности формы; возвращает {ok: boolean, errors: []}
   function validateFormData(formData) {
     const errors = [];
-    if (!formData.name || String(formData.name).trim().length < 2) errors.push('Укажите корректное название');
+    const nameValue = formData.shop_name || formData.name || '';
+    if (!nameValue || String(nameValue).trim().length < 2) errors.push('Укажите корректное название');
     if (!formData.category) errors.push('Укажите категорию');
     if (formData.floor && isNaN(Number(formData.floor))) errors.push('Этаж должен быть числом');
 
@@ -198,7 +202,7 @@
   // Считает поля формы и отправляет данные на сохранение
   async function savePavilion() {
     try {
-      const id = el('form-pavilion-id') ? el('form-pavilion-id').value : null;
+      const id = el('pavilion-id') ? el('pavilion-id').value : null;
       const building = el('building-select') ? el('building-select').value : '';
       const floorValue = el('floor-input') ? el('floor-input').value : '';
       
@@ -212,13 +216,23 @@
         }
       }
       
+      const nameValue = el('name-input') ? el('name-input').value.trim() : '';
+      const categoryValue = el('category-input') ? el('category-input').value : (el('category-select') ? el('category-select').value : '');
+      const pavilionNumber = el('location-input') ? el('location-input').value.trim() : '';
+      const brandColor = el('brand-color-input') ? el('brand-color-input').value : '';
+      const imageUrl = el('image-url') ? el('image-url').value : '';
+
       const data = {
         id,
-        name: el('form-pavilion-name') ? el('form-pavilion-name').value.trim() : '',
-        category: el('form-pavilion-category') ? el('form-pavilion-category').value : '',
+        name: nameValue,
+        shop_name: nameValue,
+        pavilion_number: pavilionNumber,
+        category: categoryValue,
         floor: floorValue,
         building: building,
-        description: el('form-pavilion-desc') ? el('form-pavilion-desc').value : '',
+        brand_color: brandColor,
+        image_url: imageUrl || null,
+        description: '',
         coordinates: coordinates,
         discounts: collectDiscountsFromForm(),
         entrances: collectEntrancesFromForm()
@@ -256,7 +270,12 @@
   function createNewPavilion() {
     currentEditingPavilion = null;
     if (el('pavilion-form')) el('pavilion-form').reset();
-    if (el('form-pavilion-image-preview')) el('form-pavilion-image-preview').src = '';
+    if (el('pavilion-id')) el('pavilion-id').value = '';
+    if (el('image-preview')) {
+      el('image-preview').src = '';
+      el('image-preview').style.display = 'none';
+    }
+    if (el('image-url')) el('image-url').value = '';
     miniMapState.coords = null;
     showMessage('Готово: создайте новый павильон', 'info');
   }
@@ -284,7 +303,10 @@
       // Предпросмотр
       const reader = new FileReader();
       reader.onload = function (e) {
-        if (el('form-pavilion-image-preview')) el('form-pavilion-image-preview').src = e.target.result;
+        if (el('image-preview')) {
+          el('image-preview').src = e.target.result;
+          el('image-preview').style.display = 'block';
+        }
       };
       reader.readAsDataURL(file);
 
@@ -298,7 +320,7 @@
         const res = await uploadFn(file, path);
         // Ожидаем, что res содержит публичный URL или {publicURL}
         const url = res?.publicURL || res?.url || res;
-        if (url && el('form-pavilion-image-url')) el('form-pavilion-image-url').value = url;
+        if (url && el('image-url')) el('image-url').value = url;
         showMessage('Изображение загружено', 'success');
         return url;
       } else {

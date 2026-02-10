@@ -51,7 +51,7 @@
         <section class="stats-grid">
             <div class="stat-card" id="stat-pavilions-card" onclick="togglePavilionEditor()" style="cursor: pointer;">
                 <div class="stat-number" id="stat-pavilions">0</div>
-                <div class="stat-label">Павильонов в корпусах</div>
+                <div class="stat-label">Мои павильоны</div>
             </div>
             <div class="stat-card" onclick="window.location.href='./discounts.html'" style="cursor: pointer;">
                 <div class="stat-number" id="stat-discounts">0</div>
@@ -66,6 +66,8 @@
                 <h2 class="admin-section-title">Корпус → Этаж → Павильон</h2>
 
                 <form id="pavilion-form">
+                    <input type="hidden" id="pavilion-id" value="">
+                    <input type="hidden" id="image-url" value="">
                     <!-- КОРПУС -->
                     <div class="form-group">
                         <label for="building-select">Корпус</label>
