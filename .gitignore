@@ -164,8 +164,11 @@ out/
 # PWA Service Worker cache
 /workspaces/apraxin/apra-shka-map/sw-cache/
 
-# Папки с изображениями планов помещений
-apra-shka-map/images/floor-plans/
+# Папка с изображениями планов (разрешаем PNG, JPG, SVG, но не временные файлы)
+apra-shka-map/images/floor-plans/.DS_Store
+apra-shka-map/images/floor-plans/*.tmp
+apra-shka-map/images/floor-plans/*.backup
+# Но PNG, JPG, SVG разрешены (см. ниже в секции Image Files)
 
 # Документы с конфиденциальной информацией
 PASSWORDS.md
