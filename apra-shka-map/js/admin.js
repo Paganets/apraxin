@@ -97,7 +97,6 @@
 
       if (el('stat-pavilions')) el('stat-pavilions').textContent = currentPavilions.length;
       if (el('stat-discounts')) el('stat-discounts').textContent = totalDiscounts;
-      if (el('stat-views')) el('stat-views').textContent = '0';
     } catch (err) {
       console.error('updateStatsUI error', err);
     }
