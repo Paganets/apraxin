@@ -20,35 +20,36 @@
     '33': {
       1: {
         image: 'images/floor-plans/building_33_floor_1.png',
-        // Примеры координат павильонов (в процентах от ширины/высоты изображения)
-        // Эти данные используются для подсвечивания и поиска павильонов
-        pavilionsApprox: {
-          // '1.10': { x: 50, y: 45, w: 8, h: 8 },  // 1.10 в центре
-          // '1.12': { x: 30, y: 45, w: 8, h: 8 },  // 1.12 слева
-          // и т.д.
+        // Карта павильонов (пиксели): диапазон X и Y → номер павильона
+        // Основано на плане 1052×208px: 6 павильонов в ширину × 2 ряда
+        pavilionsMap: {
+          '0-175,0-104': '1.01',     '175-350,0-104': '1.02',   '350-525,0-104': '1.03',
+          '525-700,0-104': '1.04',   '700-875,0-104': '1.05',   '875-1052,0-104': '1.06',
+          '0-175,104-208': '1.07',   '175-350,104-208': '1.08', '350-525,104-208': '1.09',
+          '525-700,104-208': '1.10', '700-875,104-208': '1.11', '875-1052,104-208': '1.12'
         }
       },
       2: {
         image: 'images/floor-plans/building_33_floor_2.png',
-        pavilionsApprox: {}
+        pavilionsMap: {}
       },
       3: {
         image: 'images/floor-plans/building_33_floor_3.png',
-        pavilionsApprox: {}
+        pavilionsMap: {}
       },
       4: {
         image: 'images/floor-plans/building_33_floor_4.png',
-        pavilionsApprox: {}
+        pavilionsMap: {}
       },
       5: {
         image: 'images/floor-plans/building_33_floor_5.png',
-        pavilionsApprox: {}
+        pavilionsMap: {}
       }
     },
     // Для других корпусов (A, B, C, D) можно добавить аналогично
     'A': {
-      1: { image: 'images/floor-plans/building_a_floor_1.png', pavilionsApprox: {} },
-      2: { image: 'images/floor-plans/building_a_floor_2.png', pavilionsApprox: {} }
+      1: { image: 'images/floor-plans/building_a_floor_1.png', pavilionsMap: {} },
+      2: { image: 'images/floor-plans/building_a_floor_2.png', pavilionsMap: {} }
     }
     // и т.д.
   };
@@ -201,18 +202,22 @@
     const xPercent = (x / canvas.width) * 100;
     const yPercent = (y / canvas.height) * 100;
 
-    console.log(`📍 Клик по плану: ${xPercent.toFixed(1)}%, ${yPercent.toFixed(1)}%`);
+    // Определяем номер павильона по координатам клика
+    const pavilionNumber = getPavilionNumberAtPoint(floorPlanState.currentBuilding, floorPlanState.currentFloor, x, y);
 
-    // Сохраняем координаты
-    saveFloorPlanCoordinates(xPercent, yPercent);
-
-    // Попытаемся найти, какой павильон здесь находится
-    const pavilion = findPavilionAtPoint(xPercent, yPercent);
-    if (pavilion) {
-      floorPlanState.selectedPavilion = pavilion.pavilion_number;
-      showMessage(`✓ Выбран павильон №${pavilion.pavilion_number}`, 'success');
+    if (pavilionNumber) {
+      // Заполняем поле "Номер павильона"
+      const locationInput = document.getElementById('location-input');
+      if (locationInput) {
+        locationInput.value = pavilionNumber;
+        showMessage(`✓ Выбран павильон ${pavilionNumber}`, 'success');
+      }
+      
+      // Сохраняем координаты в скрытые поля
+      saveFloorPlanCoordinates(xPercent, yPercent);
+      floorPlanState.selectedPavilion = pavilionNumber;
     } else {
-      showMessage(`Координаты установлены: ${xPercent.toFixed(1)}%, ${yPercent.toFixed(1)}%`, 'info');
+      showMessage('Клик вне павильона. Нажмите на павильон для его выбора', 'info');
     }
 
     redrawHighlights();
@@ -254,6 +259,37 @@
       // Проверяем, в пределах ли клик
       if (Math.abs(px - xPercent) < tolerance && Math.abs(py - yPercent) < tolerance) {
         return pavilion;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Определяет номер павильона по пиксельным координатам
+   * Использует карту pavilionsMap из конфигурации плана
+   */
+  function getPavilionNumberAtPoint(building, floor, pixelX, pixelY) {
+    if (!FLOOR_PLANS_CONFIG[building] || !FLOOR_PLANS_CONFIG[building][floor]) {
+      return null;
+    }
+
+    const floorConfig = FLOOR_PLANS_CONFIG[building][floor];
+    const pavilionsMap = floorConfig.pavilionsMap;
+
+    if (!pavilionsMap || Object.keys(pavilionsMap).length === 0) {
+      return null;
+    }
+
+    // Проходим по каждому павильону в карте
+    for (const [region, pavilionNumber] of Object.entries(pavilionsMap)) {
+      const [xRange, yRange] = region.split(',');
+      const [x1, x2] = xRange.split('-').map(Number);
+      const [y1, y2] = yRange.split('-').map(Number);
+
+      // Проверяем, находится ли клик в пределах этого павильона
+      if (pixelX >= x1 && pixelX <= x2 && pixelY >= y1 && pixelY <= y2) {
+        return pavilionNumber;
       }
     }
 

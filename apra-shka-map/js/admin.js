@@ -142,9 +142,6 @@
         const yVal = typeof p.coordinates.y === 'number' ? p.coordinates.y : 0;
         if (el('pavilion-x')) el('pavilion-x').value = xVal;
         if (el('pavilion-y')) el('pavilion-y').value = yVal;
-        if (el('coords-display')) {
-          el('coords-display').innerHTML = `<strong>Координаты:</strong> ${xVal.toFixed(1)}% × ${yVal.toFixed(1)}%`;
-        }
       }
 
       // Показываем план если это корпус 33
