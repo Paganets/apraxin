@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест плана этажа</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+        }
+        .floor-plan-wrapper {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: auto;
+            max-width: 100%;
+            max-height: 70vh;
+            background: #f5f5f5;
+            position: relative;
+            -webkit-overflow-scrolling: touch;
+        }
+        .floor-plan-inner {
+            position: relative;
+            display: inline-block;
+            min-width: 100%;
+        }
+        #floor-plan-img {
+            width: auto;
+            max-width: none;
+            height: auto;
+            display: block;
+            cursor: crosshair;
+            min-width: 100%;
+        }
+        .coords {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e8f4f8;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Тест плана этажа - Корпус 33</h1>
+        
+        <div class="test-section">
+            <h2>Статус загрузки</h2>
+            <div id="status" class="status info">Загрузка...</div>
+        </div>
+
+        <div class="test-section">
+            <h2>Путь к изображению</h2>
+            <p><strong>Относительный путь:</strong> <code>images/floor-plans/building_33_floor_1.png</code></p>
+            <p><strong>Абсолютный путь:</strong> <code id="abs-path"></code></p>
+        </div>
+
+        <div class="test-section">
+            <h2>План этажа</h2>
+            <p>👆 Кликните по плану для получения координат</p>
+            
+            <div class="floor-plan-wrapper" id="plan-wrapper">
+                <div class="floor-plan-inner">
+                    <img id="floor-plan-img" 
+                         src="images/floor-plans/building_33_floor_1.png" 
+                         alt="План этажа Корпус 33, Этаж 1">
+                </div>
+            </div>
+            
+            <div class="coords" id="coords-display">
+                Координаты появятся здесь после клика по плану
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Информация об изображении</h2>
+            <div id="image-info"></div>
+        </div>
+    </div>
+
+    <script>
+        const img = document.getElementById('floor-plan-img');
+        const statusDiv = document.getElementById('status');
+        const coordsDiv = document.getElementById('coords-display');
+        const imageInfoDiv = document.getElementById('image-info');
+        const absPathSpan = document.getElementById('abs-path');
+
+        // Показываем абсолютный путь
+        absPathSpan.textContent = new URL(img.src, window.location.href).href;
+
+        // Обработка успешной загрузки
+        img.onload = function() {
+            statusDiv.className = 'status success';
+            statusDiv.textContent = '✅ Изображение загружено успешно!';
+            
+            imageInfoDiv.innerHTML = `
+                <p><strong>Размер:</strong> ${img.naturalWidth} × ${img.naturalHeight} px</p>
+                <p><strong>Отображаемый размер:</strong> ${img.width} × ${img.height} px</p>
+                <p><strong>Соотношение сторон:</strong> ${(img.naturalWidth / img.naturalHeight).toFixed(2)}</p>
+            `;
+        };
+
+        // Обработка ошибки загрузки
+        img.onerror = function() {
+            statusDiv.className = 'status error';
+            statusDiv.innerHTML = `
+                ❌ Ошибка загрузки изображения!<br>
+                <strong>Проверьте:</strong><br>
+                1. Файл существует по пути: images/floor-plans/building_33_floor_1.png<br>
+                2. Путь указан относительно HTML файла<br>
+                3. Нет опечаток в имени файла
+            `;
+        };
+
+        // Обработка клика по изображению
+        img.addEventListener('click', function(e) {
+            const rect = img.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Конвертируем в проценты
+            const xPercent = (x / img.width) * 100;
+            const yPercent = (y / img.height) * 100;
+            
+            coordsDiv.innerHTML = `
+                <strong>Пиксели:</strong> X=${Math.round(x)}, Y=${Math.round(y)}<br>
+                <strong>Проценты:</strong> X=${xPercent.toFixed(2)}%, Y=${yPercent.toFixed(2)}%<br>
+                <strong>JSON:</strong> {"x": ${xPercent.toFixed(2)}, "y": ${yPercent.toFixed(2)}}
+            `;
+            
+            console.log('Клик:', {
+                pixels: { x: Math.round(x), y: Math.round(y) },
+                percent: { x: xPercent.toFixed(2), y: yPercent.toFixed(2) }
+            });
+        });
+
+        // Добавляем визуальный индикатор при клике
+        img.addEventListener('click', function(e) {
+            const dot = document.createElement('div');
+            dot.style.position = 'absolute';
+            dot.style.width = '10px';
+            dot.style.height = '10px';
+            dot.style.borderRadius = '50%';
+            dot.style.background = 'red';
+            dot.style.border = '2px solid yellow';
+            dot.style.left = (e.clientX - 5) + 'px';
+            dot.style.top = (e.clientY - 5) + 'px';
+            dot.style.pointerEvents = 'none';
+            dot.style.zIndex = '9999';
+            
+            document.body.appendChild(dot);
+            
+            setTimeout(() => dot.remove(), 1500);
+        });
+    </script>
+</body>
+</html>

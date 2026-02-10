@@ -27,6 +27,11 @@
     <!-- Стили -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/admin.css">
+
+    <!-- Скрипты -->
+    <script src="js/floor-plan.service.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/data.js"></script>
 </head>
 <body>
     <!-- ШАПКА АДМИН-ПАНЕЛИ -->
@@ -91,11 +96,31 @@
                     <!-- ПЛАН ЭТАЖА КОРПУСА 33 -->
                     <div class="form-group" id="floor-plan-container" style="display: none;">
                         <label>План этажа (кликните для указания позиции)</label>
-                        <div style="border: 2px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; max-width: 100%; background: #f0f0f0; position: relative;">
-                            <img id="floor-plan-image" src="/images/floor-plans/building_33_floor_1.png" alt="План этажа" style="width: 100%; height: auto; display: block; cursor: crosshair;">
-                            <canvas id="floor-plan-canvas" style="position: absolute; top: 0; left: 0; cursor: crosshair; display: none;"></canvas>
+                        <div id="floor-plan-wrapper" style="
+                            border: 2px solid var(--color-border); 
+                            border-radius: var(--radius-md); 
+                            overflow: auto; 
+                            max-width: 100%; 
+                            max-height: 70vh;
+                            background: #f0f0f0; 
+                            position: relative;
+                            -webkit-overflow-scrolling: touch;
+                        ">
+                            <div style="position: relative; display: inline-block; min-width: 100%;">
+                                <img id="floor-plan-image" src="images/floor-plans/building_33_floor_1.png" alt="План этажа" style="
+                                    width: auto; 
+                                    max-width: none;
+                                    height: auto; 
+                                    display: block; 
+                                    cursor: crosshair;
+                                    min-width: 100%;
+                                ">
+                                <canvas id="floor-plan-canvas" style="position: absolute; top: 0; left: 0; cursor: crosshair; display: none;"></canvas>
+                            </div>
                         </div>
-                        <div style="font-size: var(--font-size-xs); color: var(--color-text-light); margin-top: var(--spacing-xs);" id="coords-display"></div>
+                        <div style="font-size: var(--font-size-xs); color: var(--color-text-light); margin-top: var(--spacing-xs); padding: 8px; background: #e8f4f8; border-radius: 4px;" id="coords-display">
+                            💡 Выберите этаж, затем кликните на плане для указания позиции павильона
+                        </div>
                         <input type="hidden" id="pavilion-x" value="">
                         <input type="hidden" id="pavilion-y" value="">
                     </div>
@@ -484,42 +509,24 @@
                 });
             }
             
-            // Обработка выбора корпуса 33 и отображение плана этажа
+            // Обработка выбора корпуса и отображение плана этажа для корпуса 33
             const buildingSelect = document.getElementById('building-select');
+            const floorInput = document.getElementById('floor-input');
             const floorPlanContainer = document.getElementById('floor-plan-container');
+            
             if (buildingSelect) {
                 buildingSelect.addEventListener('change', (e) => {
-                    if (e.target.value === '33') {
-                        floorPlanContainer.style.display = 'block';
-                        setupFloorPlanClick();
-                    } else {
-                        floorPlanContainer.style.display = 'none';
-                    }
+                    selectBuilding(e.target.value);
+                });
+            }
+            
+            // Обработка выбора этажа - показываем и загружаем план
+            if (floorInput) {
+                floorInput.addEventListener('change', (e) => {
+                    selectFloor(e.target.value);
                 });
             }
         });
-
-        function setupFloorPlanClick() {
-            const floorPlanImage = document.getElementById('floor-plan-image');
-            const coordsDisplay = document.getElementById('coords-display');
-            const xInput = document.getElementById('pavilion-x');
-            const yInput = document.getElementById('pavilion-y');
-            
-            if (floorPlanImage) {
-                floorPlanImage.addEventListener('click', (e) => {
-                    const rect = floorPlanImage.getBoundingClientRect();
-                    const x = Math.round(e.clientX - rect.left);
-                    const y = Math.round(e.clientY - rect.top);
-                    
-                    xInput.value = x;
-                    yInput.value = y;
-                    coordsDisplay.textContent = `Позиция: X=${x}, Y=${y}`;
-                    
-                    // Отправляем координаты в скрытые поля для сохранения
-                    console.log('Павильон позиция установлена: x=' + x + ', y=' + y);
-                });
-            }
-        }
 
         function hideAddCategoryModal() {
             document.getElementById('add-category-modal').style.display = 'none';

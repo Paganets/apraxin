@@ -128,14 +128,40 @@
 
       // Проставляем поля (под именами полей в admin.html)
       if (el('form-pavilion-id')) el('form-pavilion-id').value = p.id || '';
-      if (el('form-pavilion-name')) el('form-pavilion-name').value = p.name || '';
-      if (el('form-pavilion-category')) el('form-pavilion-category').value = p.category || '';
-      if (el('form-pavilion-floor')) el('form-pavilion-floor').value = p.floor || '';
+      if (el('building-select')) el('building-select').value = p.building || '';
+      if (el('floor-input')) el('floor-input').value = p.floor || '';
+      if (el('location-input')) el('location-input').value = p.pavilion_number || '';
+      if (el('name-input')) el('name-input').value = p.shop_name || '';
+      if (el('category-select')) el('category-select').value = p.category || '';
       if (el('form-pavilion-desc')) el('form-pavilion-desc').value = p.description || '';
 
-      // Координаты
+      // Координаты - сохраняем в hidden inputs
       if (p.coordinates) {
-        setCoordinates(p.coordinates.x, p.coordinates.y);
+        // Если это процентная координата (0-100), заполняем напрямую
+        const xVal = typeof p.coordinates.x === 'number' ? p.coordinates.x : 0;
+        const yVal = typeof p.coordinates.y === 'number' ? p.coordinates.y : 0;
+        if (el('pavilion-x')) el('pavilion-x').value = xVal;
+        if (el('pavilion-y')) el('pavilion-y').value = yVal;
+        if (el('coords-display')) {
+          el('coords-display').innerHTML = `<strong>Координаты:</strong> ${xVal.toFixed(1)}% × ${yVal.toFixed(1)}%`;
+        }
+      }
+
+      // Показываем план если это корпус 33
+      if (p.building === '33' && window.FloorPlan) {
+        const container = el('floor-plan-container');
+        if (container) container.style.display = 'block';
+        
+        // Инициализируем план
+        const allPavilions = currentPavilions || [];
+        window.FloorPlan.init(p.building, parseInt(p.floor) || 1, allPavilions);
+        
+        // Подсвечиваем текущий павильон, если у него есть координаты
+        if (p.pavilion_number && p.coordinates) {
+          setTimeout(() => {
+            window.FloorPlan.highlightPavilion(p.pavilion_number);
+          }, 100);
+        }
       }
 
       // Изображение предпросмотр
@@ -176,13 +202,27 @@
   async function savePavilion() {
     try {
       const id = el('form-pavilion-id') ? el('form-pavilion-id').value : null;
+      const building = el('building-select') ? el('building-select').value : '';
+      const floorValue = el('floor-input') ? el('floor-input').value : '';
+      
+      // Захватываем координаты из скрытых полей для плана этажа (корпус 33)
+      let coordinates = miniMapState.coords || null;
+      if (building === '33') {
+        const pavX = el('pavilion-x') ? parseFloat(el('pavilion-x').value) : null;
+        const pavY = el('pavilion-y') ? parseFloat(el('pavilion-y').value) : null;
+        if (pavX !== null && pavY !== null && !isNaN(pavX) && !isNaN(pavY)) {
+          coordinates = { x: pavX, y: pavY };
+        }
+      }
+      
       const data = {
         id,
         name: el('form-pavilion-name') ? el('form-pavilion-name').value.trim() : '',
         category: el('form-pavilion-category') ? el('form-pavilion-category').value : '',
-        floor: el('form-pavilion-floor') ? el('form-pavilion-floor').value : '',
+        floor: floorValue,
+        building: building,
         description: el('form-pavilion-desc') ? el('form-pavilion-desc').value : '',
-        coordinates: miniMapState.coords || null,
+        coordinates: coordinates,
         discounts: collectDiscountsFromForm(),
         entrances: collectEntrancesFromForm()
       };
@@ -459,8 +499,42 @@
 
   function selectFloor(floor) {
     miniMapState.floor = floor;
-    // В будущем можно менять слой SVG
-    showMessage(`Этаж ${floor} выбран`, 'info');
+    
+    const building = el('building-select') ? el('building-select').value : '';
+    const floorPlanContainer = el('floor-plan-container');
+    
+    // Для корпуса 33: показываем план и инициализируем его
+    if (building === '33' && floor && window.FloorPlan) {
+      if (floorPlanContainer) floorPlanContainer.style.display = 'block';
+      
+      const allPavilions = currentPavilions || [];
+      window.FloorPlan.init(building, parseInt(floor), allPavilions);
+      
+      showMessage(`Загружен план: Корпус 33, этаж ${floor}`, 'success');
+    } else {
+      showMessage(`Этаж ${floor} выбран`, 'info');
+    }
+  }
+
+  /**
+   * Обработчик выбора корпуса
+   * Готовит UI, но план показывается только после выбора этажа
+   */
+  function selectBuilding(building) {
+    miniMapState.building = building;
+    
+    const floorPlanContainer = el('floor-plan-container');
+    const floorInput = el('floor-input');
+    
+    // Для корпуса 33: сбрасываем этаж и скрываем план до выбора этажа
+    if (building === '33') {
+      if (floorInput) floorInput.value = ''; // Сбрасываем выбор этажа
+      if (floorPlanContainer) floorPlanContainer.style.display = 'none';
+      showMessage('Выберите этаж для работы с планом', 'info');
+    } else {
+      if (floorPlanContainer) floorPlanContainer.style.display = 'none';
+      showMessage(`Корпус ${building} выбран`, 'info');
+    }
   }
 
   async function renderPavilionsOnMiniMap() {
