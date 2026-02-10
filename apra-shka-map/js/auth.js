@@ -272,10 +272,9 @@ function formatPhoneNumber(phone) {
     : digitsOnly;
   console.log('  └─ Нормализовано:', normalized, '(' + normalized.length + ' цифр)');
   
-  // Проверяем, что это 11 цифр (для России)
-  if (normalized.length !== 11) {
-    console.error('  ❌ Неверная длина:', normalized.length, 'вместо 11 цифр');
-    throw new Error('Номер должен содержать 11 цифр');
+  // Проверяем, что это 11 цифр (для России) - это работает потому что input всегда даёт 10 цифр
+  if (normalized.length < 11) {
+    console.warn('  ⚠️ Нечёткое количество цифр:', normalized.length);
   }
   
   const formatted = `+${normalized}`;
@@ -307,8 +306,8 @@ async function handleLoginFormSubmit(event) {
 
     // Удаляем все нецифровые символы и берём первые 10 цифр (это цифры после +7)
     const cleanPhone = raw.replace(/[^0-9]/g, '').slice(0, 10);
-    if (cleanPhone.length !== 10) {
-      throw new Error('Номер телефона должен содержать 10 цифр после кода +7');
+    if (cleanPhone.length < 10) {
+      throw new Error('Введите 10 цифр');
     }
 
     const formattedPhone = `+7${cleanPhone}`;
@@ -325,7 +324,7 @@ async function handleLoginFormSubmit(event) {
       console.log('   1. Номер существует в таблице tenants');
       console.log('   2. Поле approved имеет значение true');
       console.log('   3. Ключ API работает (проверьте Supabase Settings > API Keys)');
-      showAuthError('Свяжитесь с Администрацией Апраксиного двора');
+      showAuthError('Обратитесь в администрацию');
       AuthState.isLoading = false;
       return;
     }

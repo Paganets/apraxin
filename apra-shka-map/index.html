@@ -248,15 +248,15 @@
         <!-- МОДАЛЬНОЕ ОКНО: ВХОД -->
         <div id="login-modal" class="modal-overlay" style="display: none; align-items: center; justify-content: center;">
             <div class="modal-content" style="max-width:420px; width:90%; padding:20px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                    <h3 style="margin:0;">Вход</h3>
-                    <button id="login-modal-close" class="modal-close" style="font-size:20px; background:none; border:none;">X</button>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <h3 style="margin:0; color:#ffffff; font-size:24px;">Вход</h3>
+                    <button id="login-modal-close" class="modal-close" style="font-size:20px; background:none; border:none; color:#aaaaaa; cursor:pointer;">X</button>
                 </div>
                 <form id="login-form">
                     <div class="form-group">
-                        <label for="phone-input">Номер телефона</label>
-                        <div class="phone-input-wrapper" style="display:flex; gap:8px; align-items:center;">
-                            <span id="phone-prefix" aria-hidden="true" style="padding:8px 10px; background:#f5f5f5; border:1px solid #d0d0d0; border-radius:4px;">+7</span>
+                        <label for="phone-input" style="color:#e0e0e0; display:block; margin-bottom:8px; font-weight:500;">Номер телефона</label>
+                        <div class="phone-input-wrapper" style="display:flex; border:1px solid #555555; border-radius:4px; background:#2a2a2a; overflow:hidden;">
+                            <span id="phone-prefix" aria-hidden="true" style="padding:10px 12px; background:#333333; border-right:1px solid #555555; color:#ffffff; font-weight:500; white-space:nowrap; user-select:none;">+7</span>
                             <input
                                 type="tel"
                                 id="phone-input"
@@ -266,12 +266,12 @@
                                 pattern="[0-9]*"
                                 maxlength="10"
                                 required
-                                style="flex:1; padding:8px;"
+                                style="flex:1; padding:10px 12px; background:#2a2a2a; border:none; color:#ffffff; font-size:16px; outline:none;"
                                 aria-label="Номер телефона без кода страны">
                         </div>
                     </div>
-                    <div id="auth-error" style="color:#b00020; display:none; margin-bottom:8px;"></div>
-                    <div id="auth-success" style="color:#008000; display:none; margin-bottom:8px;"></div>
+                    <div id="auth-error" style="color:#ff6b6b; display:none; margin-bottom:12px; font-size:14px;"></div>
+                    <div id="auth-success" style="color:#51cf66; display:none; margin-bottom:12px; font-size:14px;"></div>
                     <div style="display:flex; gap:8px;">
                         <button type="submit" class="btn btn-primary" style="flex:1;">Войти</button>
                         <button type="button" class="btn btn-secondary" style="flex:1;" id="login-cancel">Отмена</button>
