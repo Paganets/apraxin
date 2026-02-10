@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS tenants (
   phone TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
   approved BOOLEAN DEFAULT FALSE,
+  is_owner BOOLEAN DEFAULT FALSE,
+  is_premium BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   
   CONSTRAINT phone_format CHECK (phone ~ '^\+?[0-9]{10,15}$')
@@ -26,6 +28,8 @@ COMMENT ON COLUMN tenants.id IS 'Уникальный идентификатор
 COMMENT ON COLUMN tenants.phone IS 'Номер телефона владельца в формате +7... (уникальный)';
 COMMENT ON COLUMN tenants.name IS 'Имя владельца павильона';
 COMMENT ON COLUMN tenants.approved IS 'Статус одобрения доступа (true - одобрен, false - не одобрен)';
+COMMENT ON COLUMN tenants.is_owner IS 'Владелец павильона с правами администратора (true - владелец, false - арендатор)';
+COMMENT ON COLUMN tenants.is_premium IS 'Премиум статус арендатора (true - премиум, false - стандарт)';
 COMMENT ON COLUMN tenants.created_at IS 'Дата и время создания записи';
 
 -- ============================================================
