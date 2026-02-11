@@ -507,8 +507,17 @@
             const categorySelect = document.getElementById('category-select');
             if (categorySelect) {
                 categorySelect.addEventListener('change', (e) => {
-                    document.getElementById('category-input').value = e.target.value;
+                    const catInput = document.getElementById('category-input');
+                    if (catInput) {
+                        catInput.value = e.target.value;
+                        console.log('Категория выбрана:', e.target.value);
+                    }
                 });
+                // Инициализируем скрытое поле текущим значением
+                const catInput = document.getElementById('category-input');
+                if (catInput && categorySelect.value) {
+                    catInput.value = categorySelect.value;
+                }
             }
             
             // Обработка выбора корпуса и отображение плана этажа для корпуса 33

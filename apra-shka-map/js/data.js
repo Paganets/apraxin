@@ -176,6 +176,7 @@ async function getPavilionById(id) {
  */
 async function createPavilion(data) {
   console.log('➕ Data: Создание нового павильона');
+  console.log('📦 Data: Полученные данные:', data);
   
   try {
     // Проверяем авторизацию
@@ -184,6 +185,8 @@ async function createPavilion(data) {
       throw new Error('Требуется авторизация для создания павильона');
     }
     
+    console.log('👤 Data: Текущий пользователь:', currentTenant);
+    
     // Подготавливаем данные
     const pavilionData = {
       ...data,
@@ -191,6 +194,8 @@ async function createPavilion(data) {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
+    
+    console.log('📝 Data: Данные для отправки в БД:', pavilionData);
     
     // Отправляем в БД
     const response = await supabaseRequest(
@@ -803,8 +808,22 @@ function getCurrentUser() {
 
 /**
  * Alias для updatePavilion (совместимость с admin.js)
+ * Принимает либо (id, data) либо (data) где data.id есть
  */
-const savePavilion = updatePavilion;
+async function savePavilion(idOrData, dataIfTwoArgs) {
+  // Если передан один аргумент с полем id - это объект data
+  if (typeof idOrData === 'object' && idOrData.id) {
+    const { id, ...rest } = idOrData;
+    console.log('💾 Data: savePavilion вызван с объектом data, id =', id);
+    return await updatePavilion(id, rest);
+  }
+  // Если два аргумента - это (id, data)
+  if (dataIfTwoArgs) {
+    console.log('💾 Data: savePavilion вызван с (id, data), id =', idOrData);
+    return await updatePavilion(idOrData, dataIfTwoArgs);
+  }
+  throw new Error('savePavilion: неверные аргументы');
+}
 
 /**
  * Загружает изображение (заглушка - в реальном проекте интегрировать с Supabase Storage)

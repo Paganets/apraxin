@@ -221,6 +221,10 @@
       const pavilionNumber = el('location-input') ? el('location-input').value.trim() : '';
       const brandColor = el('brand-color-input') ? el('brand-color-input').value : '';
       const imageUrl = el('image-url') ? el('image-url').value : '';
+      
+      console.log('💾 Admin: Собраны данные формы:', {
+        building, floorValue, nameValue, categoryValue, pavilionNumber, brandColor, coordinates
+      });
 
       const data = {
         id,
@@ -238,8 +242,11 @@
         entrances: collectEntrancesFromForm()
       };
 
+      console.log('💾 Admin: Данные для сохранения:', data);
+      
       const validated = validateFormData(data);
       if (!validated.ok) {
+        console.error('❌ Admin: Валидация не прошла:', validated.errors);
         showMessage(validated.errors.join('; '), 'error');
         return;
       }
